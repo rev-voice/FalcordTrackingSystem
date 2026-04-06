@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Falcord Tracking System</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -33,389 +34,221 @@
 
     .container { max-width: 1400px; margin: 0 auto; }
 
-    /* Header con Logo */
     header {
       text-align: center;
-      padding: 32px 20px 40px;
-      border-bottom: 3px solid var(--accent);
-      margin-bottom: 32px;
+      padding: 24px 20px 32px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 24px;
       background: var(--primary-dark);
       border-radius: var(--radius);
-      position: relative;
-      overflow: hidden;
-    }
-
-    header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
     }
 
     .logo-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 16px;
+      gap: 16px;
+      margin-bottom: 8px;
     }
 
     .logo-img {
-      width: 80px;
-      height: 80px;
+      width: 60px;
+      height: 60px;
       object-fit: contain;
-      filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.3));
-      transition: transform 0.3s ease;
-    }
-
-    .logo-img:hover {
-      transform: scale(1.05);
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--accent);
       text-transform: uppercase;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .subtitle {
       color: var(--text-secondary);
-      font-size: 1.1rem;
-      margin-top: 8px;
-      font-weight: 300;
-    }
-
-    .tagline {
-      color: var(--accent);
       font-size: 0.95rem;
-      margin-top: 12px;
-      font-style: italic;
-      opacity: 0.9;
+      margin-top: 4px;
     }
 
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 80px 20px;
-    }
-
-    .spinner {
-      width: 56px;
-      height: 56px;
-      border: 5px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      margin: 0 auto 24px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Error Box */
     .error-box {
       background: rgba(239, 68, 68, 0.1);
       border: 2px solid var(--danger);
       border-radius: var(--radius);
-      padding: 28px;
-      margin: 24px auto;
+      padding: 24px;
+      margin: 20px auto;
       max-width: 800px;
       text-align: left;
     }
 
     .error-box h3 {
       color: var(--danger);
-      margin-bottom: 16px;
-      font-size: 1.3rem;
+      margin-bottom: 12px;
     }
 
     .error-box code {
       background: var(--bg-dark);
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 4px;
       font-family: monospace;
       color: var(--warning);
-      font-size: 0.9rem;
     }
 
     .retry-btn {
       background: var(--accent);
       color: var(--primary-dark);
       border: none;
-      padding: 12px 28px;
+      padding: 10px 24px;
       border-radius: var(--radius);
       font-weight: 600;
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: 16px;
       font-size: 1rem;
-      transition: all 0.2s ease;
     }
 
-    .retry-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    .retry-btn:hover { opacity: 0.9; }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
     }
 
-    /* Products Section */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 32px 0 20px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--accent);
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 1s linear infinite;
     }
 
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .product-count {
-      background: var(--bg-card);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .table-container {
       background: var(--bg-card);
       border-radius: var(--radius);
       border: 1px solid var(--border);
       overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      margin: 20px 0;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; }
 
-    thead {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    }
+    thead { background: var(--primary); }
 
     th {
-      padding: 16px 18px;
+      padding: 14px 16px;
       text-align: left;
       font-weight: 600;
       color: var(--text-primary);
       border-bottom: 2px solid var(--accent);
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.5px;
     }
 
     td {
-      padding: 16px 18px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    tbody tr {
-      transition: all 0.2s ease;
-      cursor: pointer;
     }
 
     tbody tr:hover {
       background: #4a4a4a;
-      transform: translateX(4px);
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
+      cursor: pointer;
     }
 
     .uuid-cell {
-      font-family: 'Courier New', monospace;
+      font-family: monospace;
       color: var(--accent);
       background: rgba(255, 215, 0, 0.1);
-      padding: 6px 10px;
+      padding: 4px 8px;
       border-radius: 4px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1px solid rgba(255, 215, 0, 0.2);
-    }
-
-    .product-name {
-      font-weight: 600;
-      color: var(--text-primary);
     }
 
     .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
+      display: inline-block;
+      padding: 4px 12px;
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .status-ok {
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(16, 185, 129, 0.2);
       color: var(--success);
       border: 1px solid var(--success);
     }
 
     .status-warning {
-      background: rgba(245, 158, 11, 0.15);
+      background: rgba(245, 158, 11, 0.2);
       color: var(--warning);
       border: 1px solid var(--warning);
     }
 
     .status-danger {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, 0.2);
       color: var(--danger);
       border: 1px solid var(--danger);
     }
 
-    .status-badge::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    /* Scans Panel */
     .scans-panel {
       background: var(--bg-card);
       border-radius: var(--radius);
       border: 2px solid var(--accent);
-      padding: 24px;
-      margin-top: 32px;
+      padding: 20px;
+      margin-top: 24px;
       display: none;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .scans-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
     }
 
     .scans-title {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       font-weight: 600;
       color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .close-btn {
       background: var(--primary);
       border: none;
       color: var(--text-primary);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       cursor: pointer;
-      padding: 8px 16px;
+      padding: 4px 12px;
       border-radius: 6px;
-      transition: all 0.2s ease;
     }
 
-    .close-btn:hover {
-      background: var(--danger);
-      transform: rotate(90deg);
-    }
+    .close-btn:hover { background: var(--danger); }
 
     .scan-item {
       background: var(--bg-dark);
-      padding: 16px 20px;
+      padding: 12px 16px;
       border-radius: 8px;
-      border-left: 4px solid var(--accent);
-      margin-bottom: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .scan-item:hover {
-      transform: translateX(4px);
-      border-left-color: var(--success);
+      border-left: 3px solid var(--accent);
+      margin-bottom: 8px;
     }
 
     .scan-time {
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 6px;
-      font-size: 1rem;
+      margin-bottom: 4px;
     }
 
     .scan-meta {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-secondary);
     }
 
-    .empty-scans {
-      text-align: center;
-      padding: 32px;
-      color: var(--text-secondary);
-      font-style: italic;
-      font-size: 1.1rem;
-    }
-
-    /* Footer */
     footer {
       text-align: center;
-      padding: 32px 20px;
+      padding: 24px;
       color: var(--text-secondary);
-      margin-top: 48px;
+      margin-top: 40px;
       border-top: 1px solid var(--border);
-    }
-
-    .footer-logo {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      margin-bottom: 12px;
-      opacity: 0.7;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .logo-container {
-        flex-direction: column;
-        gap: 12px;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-      
-      .table-container {
-        overflow-x: auto;
-      }
-      
-      table {
-        min-width: 600px;
-      }
-      
-      th, td {
-        padding: 12px 14px;
-        font-size: 0.9rem;
-      }
     }
   </style>
 </head>
@@ -427,7 +260,6 @@
         <div>
           <h1>Falcord Tracking System</h1>
           <p class="subtitle">Gestione digitale trasparente del ciclo di vita</p>
-          <p class="tagline">"Più di semplici corde. Sicurezza operativa in tempo reale."</p>
         </div>
       </div>
     </header>
@@ -440,13 +272,7 @@
     <div id="error" style="display: none;"></div>
 
     <div id="productsSection" style="display: none;">
-      <div class="section-header">
-        <div class="section-title">
-          📦 Prodotti Registrati
-        </div>
-        <div class="product-count" id="productCount">0 prodotti</div>
-      </div>
-      
+      <h2 style="color: var(--accent); margin: 24px 0 16px;">📦 Prodotti</h2>
       <div class="table-container">
         <table>
           <thead>
@@ -465,20 +291,19 @@
 
       <div id="scansPanel" class="scans-panel">
         <div class="scans-header">
-          <div class="scans-title">
-            🔍 Storico Scansioni
+          <div>
+            <div class="scans-title">🔍 Storico Scansioni</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="scansUuid"></div>
           </div>
-          <button class="close-btn" id="closeScansBtn" title="Chiudi">×</button>
+          <button class="close-btn" id="closeScansBtn">×</button>
         </div>
-        <div id="scansUuid" style="color: var(--text-secondary); margin-bottom: 16px; font-family: monospace;"></div>
         <div id="scansList"></div>
       </div>
     </div>
 
     <footer>
-      <img src="falcord_logo_500.png" alt="Falcord" class="footer-logo" />
       <p>Falcord Tracking System • Gestione Digitale Ciclo di Vita</p>
-      <p style="margin-top: 8px; font-size: 0.9rem;">© 2024 Falcord S.r.l. • v1.2</p>
+      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.2</p>
     </footer>
   </div>
 
@@ -553,7 +378,6 @@
           }
 
           console.log(`✓ Loaded ${data.length} products`);
-          document.getElementById('productCount').textContent = `${data.length} prodotti`;
 
           const tbody = document.getElementById('productsTableBody');
           tbody.innerHTML = data.map(product => {
@@ -563,7 +387,7 @@
             return `
               <tr data-uuid="${product.nfc_uuid}">
                 <td><span class="uuid-cell">${product.nfc_uuid}</span></td>
-                <td><span class="product-name">${PRODUCT_MAP[product.prodotto] || 'Sconosciuto'}</span></td>
+                <td>${PRODUCT_MAP[product.prodotto] || 'Sconosciuto'}</td>
                 <td>${product.diametro} mm</td>
                 <td>${product.lunghezza} m</td>
                 <td>${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}</td>
@@ -597,7 +421,7 @@
         console.log(`Loading scans for: ${tagUuid}`);
         
         uuidDisplay.textContent = `UUID: ${tagUuid}`;
-        list.innerHTML = '<div class="loading"><div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto;"></div></div>';
+        list.innerHTML = '<div class="loading"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto;"></div></div>';
         panel.style.display = 'block';
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -613,7 +437,7 @@
           if (error) throw error;
 
           if (!data || data.length === 0) {
-            list.innerHTML = '<div class="empty-scans">Nessuna scansione registrata per questo tag</div>';
+            list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary);">Nessuna scansione registrata</div>';
             return;
           }
 
@@ -648,8 +472,8 @@
             <h3>❌ Errore di Connessione</h3>
             <p><strong>Dettaglio:</strong> <code>${message}</code></p>
             
-            <h4 style="margin:20px 0 12px;color:var(--warning);">Possibili Soluzioni:</h4>
-            <ul style="margin-left:20px;color:var(--text-secondary);line-height:1.8;">
+            <h4 style="margin:16px 0 8px;color:var(--warning);">Possibili Soluzioni:</h4>
+            <ul style="margin-left:20px;color:var(--text-secondary);">
               <li>Verifica la connessione internet</li>
               <li>Controlla che il database sia accessibile</li>
               <li>Assicurati che le tabelle esistano nel database</li>
