@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CyberRope Tracking System</title>
+  <title>Falcord Tracking System</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1a365d;
-      --primary-light: #2c5282;
-      --accent: #f59e0b;
+      --primary: #4a4a4a;
+      --primary-dark: #2d2d2d;
+      --primary-light: #6b6b6b;
+      --accent: #FFD700;
+      --accent-hover: #FFC700;
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
-      --bg-dark: #0f172a;
-      --bg-card: #1e293b;
-      --bg-card-hover: #334155;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --border: #334155;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-      --radius: 12px;
+      --bg-dark: #2d2d2d;
+      --bg-card: #3a3a3a;
+      --bg-card-hover: #4a4a4a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border: #555555;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      --radius: 8px;
       --transition: all 0.2s ease;
     }
 
@@ -29,7 +31,7 @@
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, var(--bg-dark) 0%, #1e1b4b 100%);
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a1a 100%);
       color: var(--text-primary);
       min-height: 100vh;
       padding: 20px;
@@ -42,8 +44,10 @@
     header {
       text-align: center;
       padding: 24px 20px 32px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 2px solid var(--accent);
       margin-bottom: 24px;
+      background: var(--primary-dark);
+      border-radius: var(--radius);
     }
 
     .logo {
@@ -55,30 +59,78 @@
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--accent), #fbbf24);
-      border-radius: 10px;
+      width: 50px;
+      height: 50px;
+      background: var(--accent);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      color: var(--primary);
-      font-size: 1.1rem;
+      color: var(--primary-dark);
+      font-size: 1.2rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
 
     h1 {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
-      background: linear-gradient(90deg, #fff, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .subtitle {
       color: var(--text-secondary);
       font-size: 0.95rem;
       margin-top: 4px;
+    }
+
+    /* Debug Panel */
+    .debug-panel {
+      background: #1a1a1a;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .debug-title {
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .debug-log {
+      padding: 4px 0;
+      border-bottom: 1px solid #333;
+      color: var(--text-secondary);
+    }
+
+    .debug-log.success { color: var(--success); }
+    .debug-log.error { color: var(--danger); }
+    .debug-log.warning { color: var(--warning); }
+    .debug-log.info { color: #60a5fa; }
+
+    .clear-debug {
+      background: var(--primary);
+      color: var(--text-primary);
+      border: none;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .clear-debug:hover {
+      background: var(--primary-light);
     }
 
     /* Loading & Error */
@@ -100,7 +152,47 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .error { color: var(--danger); }
+    .error { 
+      color: var(--danger); 
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .error strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--danger);
+    }
+
+    /* Connection Status */
+    .connection-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin: 16px 0;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.connected { background: var(--success); }
+    .status-dot.disconnected { background: var(--danger); }
+    .status-dot.connecting { background: var(--warning); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
 
     /* Products Table */
     .section-title {
@@ -110,6 +202,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      color: var(--accent);
     }
 
     .table-container {
@@ -136,10 +229,11 @@
       padding: 14px 16px;
       text-align: left;
       font-weight: 600;
-      color: white;
+      color: var(--text-primary);
       text-transform: uppercase;
       font-size: 0.8rem;
       letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--accent);
     }
 
     td {
@@ -164,6 +258,9 @@
       font-size: 0.85rem;
       color: var(--accent);
       font-weight: 500;
+      background: rgba(255, 215, 0, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
     }
 
     .product-name {
@@ -172,21 +269,22 @@
 
     .status-badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.8rem;
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
     }
 
-    .status-ok { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .status-ok { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
     /* Scans Panel */
     .scans-panel {
       background: var(--bg-card);
       border-radius: var(--radius);
-      border: 1px solid var(--border);
+      border: 2px solid var(--accent);
       padding: 20px;
       margin-top: 24px;
       display: none;
@@ -211,22 +309,22 @@
     .scans-title {
       font-size: 1.1rem;
       font-weight: 600;
+      color: var(--accent);
     }
 
     .close-btn {
-      background: none;
+      background: var(--primary);
       border: none;
-      color: var(--text-secondary);
+      color: var(--text-primary);
       font-size: 1.4rem;
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 4px 12px;
       border-radius: 6px;
       transition: var(--transition);
     }
 
     .close-btn:hover {
-      background: var(--bg-card-hover);
-      color: var(--text-primary);
+      background: var(--danger);
     }
 
     .scans-list {
@@ -289,11 +387,23 @@
   <div class="container">
     <header>
       <div class="logo">
-        <div class="logo-icon">CR</div>
-        <h1>CyberRope Tracking System</h1>
+        <div class="logo-icon">F</div>
+        <h1>Falcord Tracking System</h1>
       </div>
       <p class="subtitle">Transparent digital lifecycle management • Supabase Backend</p>
+      <div id="connectionStatus" class="connection-status">
+        <span class="status-dot connecting"></span>
+        <span>Connecting to database...</span>
+      </div>
     </header>
+
+    <div id="debugPanel" class="debug-panel" style="display: none;">
+      <div class="debug-title">
+        <span>🔍 Debug Console</span>
+        <button class="clear-debug" id="clearDebugBtn">Clear</button>
+      </div>
+      <div id="debugLogs"></div>
+    </div>
 
     <div id="loading" class="loading">
       <div class="spinner"></div>
@@ -339,17 +449,65 @@
     </div>
 
     <footer>
-      <p>CyberRope Tracking System • Powered by Supabase</p>
+      <p>Falcord Tracking System • Powered by Supabase</p>
       <p style="margin-top: 8px; opacity: 0.7;">© 2024 • v1.0</p>
     </footer>
   </div>
 
   <script>
+    // ===== DEBUG UTILITIES =====
+    const DEBUG = {
+      enabled: true,
+      logs: [],
+      
+      log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = { timestamp, message, type };
+        this.logs.push(logEntry);
+        
+        // Console log
+        const consoleMethod = type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log';
+        console[consoleMethod](`[${timestamp}] ${message}`);
+        
+        // Update UI
+        if (this.enabled) {
+          this.updateDebugPanel();
+        }
+      },
+      
+      updateDebugPanel() {
+        const panel = document.getElementById('debugPanel');
+        const logsContainer = document.getElementById('debugLogs');
+        
+        panel.style.display = 'block';
+        logsContainer.innerHTML = this.logs.map(log => 
+          `<div class="debug-log ${log.type}">[${log.timestamp}] ${log.message}</div>`
+        ).join('');
+        
+        // Auto-scroll to bottom
+        panel.scrollTop = panel.scrollHeight;
+      },
+      
+      clear() {
+        this.logs = [];
+        this.updateDebugPanel();
+      }
+    };
+
     // ===== SUPABASE CONFIG =====
     const SUPABASE_URL = 'https://exshynvdaacktlbwfqrq.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    DEBUG.log('Initializing Supabase client...', 'info');
+    DEBUG.log(`Supabase URL: ${SUPABASE_URL}`, 'info');
+    
+    let supabase;
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      DEBUG.log('Supabase client created successfully', 'success');
+    } catch (error) {
+      DEBUG.log(`Failed to create Supabase client: ${error.message}`, 'error');
+    }
 
     // ===== DATA MAPPINGS =====
     const PRODUCT_MAP = {
@@ -361,7 +519,7 @@
       1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix"
     };
 
-    // ===== STATUS CALCULATION (from Android logic) =====
+    // ===== STATUS CALCULATION =====
     function calculateStatus(prodDateInt, coreCode) {
       const prodYear = Math.floor(prodDateInt / 10000);
       const prodMonth = Math.floor((prodDateInt % 10000) / 100);
@@ -371,36 +529,93 @@
       const ageYears = (today - prodDate) / (1000 * 60 * 60 * 24 * 365.25);
       let lifespan = 5.0;
       
-      if ([3, 4].includes(coreCode)) lifespan += 2.0; // Dyneema or HMWPE
+      if ([3, 4].includes(coreCode)) lifespan += 2.0;
       
       if (ageYears < lifespan - 2) return { label: "OK", class: "status-ok" };
       if (ageYears < lifespan) return { label: "Attention", class: "status-warning" };
       return { label: "Danger", class: "status-danger" };
     }
 
+    // ===== UPDATE CONNECTION STATUS =====
+    function updateConnectionStatus(status, message) {
+      const statusEl = document.getElementById('connectionStatus');
+      const dot = statusEl.querySelector('.status-dot');
+      const text = statusEl.querySelector('span:last-child');
+      
+      dot.className = 'status-dot ' + status;
+      text.textContent = message;
+    }
+
+    // ===== TEST SUPABASE CONNECTION =====
+    async function testConnection() {
+      DEBUG.log('Testing Supabase connection...', 'info');
+      updateConnectionStatus('connecting', 'Testing connection...');
+      
+      try {
+        // Try a simple query to test connection
+        const { data, error } = await supabase
+          .from('products')
+          .select('nfc_uuid')
+          .limit(1);
+        
+        if (error) {
+          DEBUG.log(`Connection test failed: ${error.message}`, 'error');
+          DEBUG.log(`Error code: ${error.code}`, 'error');
+          updateConnectionStatus('disconnected', 'Connection failed');
+          return false;
+        }
+        
+        DEBUG.log('Connection test successful!', 'success');
+        DEBUG.log(`Test query returned ${data?.length || 0} rows`, 'success');
+        updateConnectionStatus('connected', 'Connected to database');
+        return true;
+      } catch (err) {
+        DEBUG.log(`Connection test error: ${err.message}`, 'error');
+        updateConnectionStatus('disconnected', 'Connection error');
+        return false;
+      }
+    }
+
     // ===== FETCH & DISPLAY PRODUCTS =====
     async function loadProducts() {
+      DEBUG.log('Starting loadProducts()...', 'info');
       document.getElementById('loading').style.display = 'block';
       document.getElementById('error').style.display = 'none';
       document.getElementById('productsSection').style.display = 'none';
 
       try {
+        DEBUG.log('Querying products table...', 'info');
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .order('data_creazione', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          DEBUG.log(`Query error: ${error.message}`, 'error');
+          DEBUG.log(`Error details: ${JSON.stringify(error)}`, 'error');
+          throw error;
+        }
+        
+        DEBUG.log(`Query successful! Retrieved ${data?.length || 0} products`, 'success');
+        
         if (!data || data.length === 0) {
-          document.getElementById('error').textContent = '⚠️ No products found in database';
+          DEBUG.log('No products found in database', 'warning');
+          document.getElementById('error').innerHTML = `
+            <strong>⚠️ No products found</strong>
+            The database connection is working, but no products were found.<br>
+            Make sure you have data in the 'products' table.
+          `;
           document.getElementById('error').style.display = 'block';
           return;
         }
 
+        DEBUG.log('Rendering products table...', 'info');
         const tbody = document.getElementById('productsTableBody');
         tbody.innerHTML = '';
 
-        data.forEach(product => {
+        data.forEach((product, index) => {
+          DEBUG.log(`Processing product ${index + 1}/${data.length}: ${product.nfc_uuid}`, 'info');
+          
           const status = calculateStatus(product.data_produzione, product.anima);
           const prodDate = product.data_produzione?.toString() || "20230101";
           const prodYear = prodDate.substring(0, 4);
@@ -422,19 +637,43 @@
           tbody.appendChild(row);
         });
 
+        DEBUG.log('Products table rendered successfully', 'success');
         document.getElementById('loading').style.display = 'none';
         document.getElementById('productsSection').style.display = 'block';
 
       } catch (err) {
-        console.error('Error loading products:', err);
-        document.getElementById('error').textContent = `❌ Database error: ${err.message}`;
+        DEBUG.log(`Critical error in loadProducts: ${err.message}`, 'error');
+        DEBUG.log(`Error stack: ${err.stack}`, 'error');
+        
+        let errorMessage = `❌ Database error: ${err.message}`;
+        
+        // Common error handling
+        if (err.message.includes('JWT')) {
+          errorMessage += '<br><strong>Possible issue:</strong> Invalid Supabase API key';
+        } else if (err.message.includes('network')) {
+          errorMessage += '<br><strong>Possible issue:</strong> Network connectivity problem';
+        } else if (err.message.includes('relation')) {
+          errorMessage += '<br><strong>Possible issue:</strong> Table "products" does not exist';
+        }
+        
+        document.getElementById('error').innerHTML = `
+          <strong>${errorMessage}</strong>
+          <div style="margin-top: 12px; font-size: 0.9rem; text-align: left;">
+            <strong>Debug info:</strong><br>
+            - Supabase URL: ${SUPABASE_URL}<br>
+            - Error code: ${err.code || 'N/A'}<br>
+            - Check the debug console below for more details
+          </div>
+        `;
         document.getElementById('error').style.display = 'block';
         document.getElementById('loading').style.display = 'none';
       }
     }
 
-    // ===== FETCH & DISPLAY SCANS FOR UUID =====
+    // ===== FETCH & DISPLAY SCANS =====
     async function loadScans(tagUuid) {
+      DEBUG.log(`Loading scans for UUID: ${tagUuid}`, 'info');
+      
       const panel = document.getElementById('scansPanel');
       const list = document.getElementById('scansList');
       const uuidDisplay = document.getElementById('scansUuid');
@@ -442,18 +681,22 @@
       uuidDisplay.textContent = `UUID: ${tagUuid}`;
       list.innerHTML = '<div class="loading"><div class="spinner" style="width:24px;height:24px;border-width:2px;"></div></div>';
       panel.style.display = 'block';
-      
-      // Scroll to panel
       panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       try {
+        DEBUG.log(`Querying scans table for nfc_uuid = ${tagUuid}`, 'info');
         const { data, error } = await supabase
           .from('scans')
           .select('*')
           .eq('nfc_uuid', tagUuid)
           .order('scan_time', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          DEBUG.log(`Scans query error: ${error.message}`, 'error');
+          throw error;
+        }
+
+        DEBUG.log(`Found ${data?.length || 0} scans for this UUID`, 'success');
 
         if (!data || data.length === 0) {
           list.innerHTML = '<div class="empty-scans">No scan history recorded for this tag</div>';
@@ -477,18 +720,47 @@
         }).join('');
 
       } catch (err) {
-        console.error('Error loading scans:', err);
+        DEBUG.log(`Error loading scans: ${err.message}`, 'error');
         list.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
       }
     }
 
     // ===== EVENT LISTENERS =====
     document.getElementById('closeScansBtn').addEventListener('click', () => {
+      DEBUG.log('Closing scans panel', 'info');
       document.getElementById('scansPanel').style.display = 'none';
     });
 
-    // ===== INIT =====
-    document.addEventListener('DOMContentLoaded', loadProducts);
+    document.getElementById('clearDebugBtn').addEventListener('click', () => {
+      DEBUG.clear();
+      DEBUG.log('Debug console cleared by user', 'info');
+    });
+
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', async () => {
+      DEBUG.log('=== DOMContentLoaded ===', 'info');
+      DEBUG.log('Page initialized', 'info');
+      
+      // Test connection first
+      const connected = await testConnection();
+      
+      if (connected) {
+        // Load products
+        await loadProducts();
+      } else {
+        DEBUG.log('Skipping product load due to connection failure', 'error');
+      }
+    });
+
+    // ===== ERROR HANDLING =====
+    window.addEventListener('error', (e) => {
+      DEBUG.log(`Global error: ${e.message}`, 'error');
+      DEBUG.log(`At: ${e.filename}:${e.lineno}:${e.colno}`, 'error');
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+      DEBUG.log(`Unhandled promise rejection: ${e.reason}`, 'error');
+    });
   </script>
 </body>
 </html>
