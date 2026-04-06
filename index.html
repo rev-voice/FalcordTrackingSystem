@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberRope Tracking System</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a365d;
+      --primary-light: #2c5282;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      --radius: 12px;
+      --transition: all 0.2s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #1e1b4b 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 24px 20px 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #fbbf24);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    /* Loading & Error */
+    .loading, .error {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error { color: var(--danger); }
+
+    /* Products Table */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 24px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    thead {
+      background: var(--primary);
+      position: sticky;
+      top: 0;
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: white;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    tbody tr {
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    .uuid-cell {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .product-name {
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-ok { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+    /* Scans Panel */
+    .scans-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-top: 24px;
+      display: none;
+      box-shadow: var(--shadow);
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scans-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scans-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+
+    .scans-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .scan-item {
+      background: var(--bg-dark);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .scan-time {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .scan-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .scan-meta span {
+      margin-right: 12px;
+    }
+
+    .empty-scans {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .table-container { overflow-x: auto; }
+      table { min-width: 600px; }
+      th, td { padding: 12px 14px; font-size: 0.9rem; }
+      .scans-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">CR</div>
+        <h1>CyberRope Tracking System</h1>
+      </div>
+      <p class="subtitle">Transparent digital lifecycle management • Supabase Backend</p>
+    </header>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading products from database...</p>
+    </div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="productsSection" style="display: none;">
+      <div class="section-title">📦 Products</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Tag UUID</th>
+              <th>Product</th>
+              <th>Diameter</th>
+              <th>Length</th>
+              <th>Prod. Date</th>
+              <th>Core</th>
+              <th>Break Load</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody">
+            <!-- Populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="scansPanel" class="scans-panel">
+        <div class="scans-header">
+          <div>
+            <div class="scans-title">🔍 Scan History</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="scansUuid"></div>
+          </div>
+          <button class="close-btn" id="closeScansBtn" title="Close">×</button>
+        </div>
+        <div id="scansList" class="scans-list">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>CyberRope Tracking System • Powered by Supabase</p>
+      <p style="margin-top: 8px; opacity: 0.7;">© 2024 • v1.0</p>
+    </footer>
+  </div>
+
+  <script>
+    // ===== SUPABASE CONFIG =====
+    const SUPABASE_URL = 'https://exshynvdaacktlbwfqrq.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ===== DATA MAPPINGS =====
+    const PRODUCT_MAP = {
+      1: "Mayorca", 2: "Capri", 3: "Mega Yacht", 4: "Megayacht SK",
+      5: "Tornado", 6: "Skipper", 7: "Tornado PPL", 8: "Trefil",
+      9: "Trefil HT", 10: "Trefil M", 11: "Liberty Oblix", 12: "Liberty SK", 13: "T16"
+    };
+    const CORE_MAP = {
+      1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix"
+    };
+
+    // ===== STATUS CALCULATION (from Android logic) =====
+    function calculateStatus(prodDateInt, coreCode) {
+      const prodYear = Math.floor(prodDateInt / 10000);
+      const prodMonth = Math.floor((prodDateInt % 10000) / 100);
+      const prodDate = new Date(prodYear, prodMonth - 1, 1);
+      const today = new Date();
+      
+      const ageYears = (today - prodDate) / (1000 * 60 * 60 * 24 * 365.25);
+      let lifespan = 5.0;
+      
+      if ([3, 4].includes(coreCode)) lifespan += 2.0; // Dyneema or HMWPE
+      
+      if (ageYears < lifespan - 2) return { label: "OK", class: "status-ok" };
+      if (ageYears < lifespan) return { label: "Attention", class: "status-warning" };
+      return { label: "Danger", class: "status-danger" };
+    }
+
+    // ===== FETCH & DISPLAY PRODUCTS =====
+    async function loadProducts() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('productsSection').style.display = 'none';
+
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('data_creazione', { ascending: false });
+
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          document.getElementById('error').textContent = '⚠️ No products found in database';
+          document.getElementById('error').style.display = 'block';
+          return;
+        }
+
+        const tbody = document.getElementById('productsTableBody');
+        tbody.innerHTML = '';
+
+        data.forEach(product => {
+          const status = calculateStatus(product.data_produzione, product.anima);
+          const prodDate = product.data_produzione?.toString() || "20230101";
+          const prodYear = prodDate.substring(0, 4);
+          const prodMonth = prodDate.substring(4, 6);
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><span class="uuid-cell">${product.nfc_uuid}</span></td>
+            <td><span class="product-name">${PRODUCT_MAP[product.prodotto] || 'Unknown'}</span></td>
+            <td>${product.diametro} mm</td>
+            <td>${product.lunghezza} m</td>
+            <td>${prodYear}-${prodMonth}</td>
+            <td>${CORE_MAP[product.anima] || 'Unknown'}</td>
+            <td>${product.carico_rottura?.toLocaleString('it-IT') || 0} kg</td>
+            <td><span class="status-badge ${status.class}">${status.label}</span></td>
+          `;
+          row.dataset.uuid = product.nfc_uuid;
+          row.addEventListener('click', () => loadScans(product.nfc_uuid));
+          tbody.appendChild(row);
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('productsSection').style.display = 'block';
+
+      } catch (err) {
+        console.error('Error loading products:', err);
+        document.getElementById('error').textContent = `❌ Database error: ${err.message}`;
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // ===== FETCH & DISPLAY SCANS FOR UUID =====
+    async function loadScans(tagUuid) {
+      const panel = document.getElementById('scansPanel');
+      const list = document.getElementById('scansList');
+      const uuidDisplay = document.getElementById('scansUuid');
+      
+      uuidDisplay.textContent = `UUID: ${tagUuid}`;
+      list.innerHTML = '<div class="loading"><div class="spinner" style="width:24px;height:24px;border-width:2px;"></div></div>';
+      panel.style.display = 'block';
+      
+      // Scroll to panel
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      try {
+        const { data, error } = await supabase
+          .from('scans')
+          .select('*')
+          .eq('nfc_uuid', tagUuid)
+          .order('scan_time', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          list.innerHTML = '<div class="empty-scans">No scan history recorded for this tag</div>';
+          return;
+        }
+
+        list.innerHTML = data.map(scan => {
+          const scanDate = new Date(scan.scan_time);
+          const formattedTime = scanDate.toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
+          return `
+            <div class="scan-item">
+              <div class="scan-time">📅 ${formattedTime}</div>
+              <div class="scan-meta">
+                <span>👤 Operator: ${scan.operator_id || 'Unknown'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error('Error loading scans:', err);
+        list.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.getElementById('closeScansBtn').addEventListener('click', () => {
+      document.getElementById('scansPanel').style.display = 'none';
+    });
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>
