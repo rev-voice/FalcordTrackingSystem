@@ -70,45 +70,6 @@
       margin-top: 4px;
     }
 
-    /* Search/Filter Section */
-    .filter-section {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .filter-label {
-      font-weight: 600;
-      color: var(--accent);
-      font-size: 0.9rem;
-    }
-
-    .filter-input {
-      flex: 1;
-      min-width: 200px;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      font-size: 0.9rem;
-    }
-
-    .filter-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .filter-input::placeholder {
-      color: var(--text-secondary);
-    }
-
     .error-box {
       background: rgba(239, 68, 68, 0.1);
       border: 2px solid var(--danger);
@@ -163,7 +124,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Transposed Table Layout */
+    /* Table Container */
     .table-container {
       overflow-x: auto;
       margin: 20px 0;
@@ -176,17 +137,17 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
-      min-width: 600px;
+      font-size: 0.85rem;
+      min-width: 800px;
     }
 
     th, td {
-      padding: 10px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       text-align: left;
       word-wrap: break-word;
       word-break: break-word;
-      max-width: 140px;
+      max-width: 150px;
       vertical-align: middle;
       line-height: 1.4;
     }
@@ -198,44 +159,47 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      white-space: nowrap;
+      border-bottom: 2px solid var(--accent);
     }
 
-    .field-label {
-      font-weight: 600;
-      color: var(--accent);
-      background: var(--primary-dark);
-      min-width: 130px;
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      border-right: 2px solid var(--border);
+    /* Column highlight */
+    tbody tr:hover td {
+      background: transparent;
     }
 
-    tbody tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 215, 0, 0.08);
+    .column-highlight {
+      background: rgba(255, 215, 0, 0.15) !important;
+      border-left: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
     }
 
     .uuid-header {
       font-family: 'Courier New', monospace;
       color: var(--accent);
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       background: rgba(255, 215, 0, 0.1);
-      padding: 6px 8px;
+      padding: 6px 10px;
       border-radius: 4px;
       display: inline-block;
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .uuid-header:hover {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: var(--accent);
+    }
+
+    .uuid-header.active {
+      background: rgba(255, 215, 0, 0.3);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
     }
 
     .status-badge {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -259,13 +223,13 @@
       border: 1px solid var(--danger);
     }
 
-    .value-cell {
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .value-cell:hover {
-      background: rgba(255, 215, 0, 0.1);
+    .field-name {
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+      background: var(--primary-dark);
+      padding: 4px 8px;
+      border-radius: 4px;
     }
 
     .empty-value {
@@ -337,12 +301,10 @@
       border-top: 1px solid var(--border);
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       h1 { font-size: 1.4rem; }
       .logo-img { width: 50px; height: 50px; }
-      th, td { padding: 8px 10px; font-size: 0.75rem; }
-      .field-label { min-width: 110px; }
+      th, td { padding: 10px 12px; font-size: 0.8rem; }
     }
   </style>
 </head>
@@ -357,12 +319,6 @@
         </div>
       </div>
     </header>
-
-    <div class="filter-section">
-      <span class="filter-label">🔍 Filtra per UUID:</span>
-      <input type="text" id="uuidFilter" class="filter-input" placeholder="Inserisci parte dell'UUID per filtrare..." />
-      <span id="productCount" style="color: var(--text-secondary); font-size: 0.9rem; white-space: nowrap;"></span>
-    </div>
 
     <div id="loading" class="loading">
       <div class="spinner"></div>
@@ -394,7 +350,7 @@
 
     <footer>
       <p>Falcord Tracking System • Gestione Digitale Ciclo di Vita</p>
-      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.3</p>
+      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.4</p>
     </footer>
   </div>
 
@@ -407,7 +363,6 @@
         DB_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c'
       };
 
-      // Mappature dai codici Android
       const PRODUCT_MAP = {
         1: "Mayorca", 2: "Capri", 3: "Mega Yacht", 4: "Megayacht SK",
         5: "Tornado", 6: "Skipper", 7: "Tornado PPL", 8: "Trefil",
@@ -440,8 +395,8 @@
       };
 
       let allProducts = [];
-      let filteredProducts = [];
       let dbClient = null;
+      let selectedColumnIndex = -1;
 
       function initDB() {
         if (dbClient) return dbClient;
@@ -491,6 +446,42 @@
         return value;
       }
 
+      function highlightColumn(columnIndex) {
+        // Remove previous highlight
+        document.querySelectorAll('.column-highlight').forEach(el => {
+          el.classList.remove('column-highlight');
+        });
+        
+        document.querySelectorAll('.uuid-header.active').forEach(el => {
+          el.classList.remove('active');
+        });
+
+        if (columnIndex === -1) {
+          selectedColumnIndex = -1;
+          return;
+        }
+
+        // Highlight all cells in the column (columnIndex + 1 because first column is field names)
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells[columnIndex + 1]) {
+            cells[columnIndex + 1].classList.add('column-highlight');
+          }
+        });
+
+        // Highlight header
+        const headers = document.querySelectorAll('#tableHead th');
+        if (headers[columnIndex + 1]) {
+          const uuidHeader = headers[columnIndex + 1].querySelector('.uuid-header');
+          if (uuidHeader) {
+            uuidHeader.classList.add('active');
+          }
+        }
+
+        selectedColumnIndex = columnIndex;
+      }
+
       function renderTable(products) {
         const thead = document.getElementById('tableHead');
         const tbody = document.getElementById('tableBody');
@@ -501,9 +492,7 @@
           return;
         }
 
-        // Definizione dei campi (righe della tabella trasposta)
         const fields = [
-          { key: 'nfc_uuid', label: 'Tag UUID', isUUID: true },
           { key: 'prodotto', label: 'Prodotto', map: PRODUCT_MAP },
           { key: 'diametro', label: 'Diametro', suffix: ' mm' },
           { key: 'lunghezza', label: 'Lunghezza', suffix: ' m' },
@@ -519,17 +508,28 @@
         ];
 
         // Header (UUIDs come colonne)
-        let headHTML = '<tr><th class="field-label">Campo</th>';
-        products.forEach(p => {
-          headHTML += `<th><span class="uuid-header">${p.nfc_uuid}</span></th>`;
+        let headHTML = '<tr><th style="min-width: 120px;">Campo</th>';
+        products.forEach((p, idx) => {
+          headHTML += `<th><span class="uuid-header" data-idx="${idx}" data-uuid="${p.nfc_uuid}">${p.nfc_uuid}</span></th>`;
         });
         headHTML += '</tr>';
         thead.innerHTML = headHTML;
 
+        // Add click listeners to headers
+        headHTML = '';
+        document.querySelectorAll('.uuid-header').forEach(header => {
+          header.addEventListener('click', () => {
+            const idx = parseInt(header.dataset.idx);
+            const uuid = header.dataset.uuid;
+            highlightColumn(idx);
+            loadScans(uuid);
+          });
+        });
+
         // Body (campi come righe)
         let bodyHTML = '';
         fields.forEach(field => {
-          bodyHTML += `<tr><td class="field-label">${field.label}</td>`;
+          bodyHTML += `<tr><td><span class="field-name">${field.label}</span></td>`;
           
           products.forEach(product => {
             let cellContent = '';
@@ -537,15 +537,13 @@
             if (field.isStatus) {
               const status = calculateStatus(product.data_produzione, product.anima);
               cellContent = `<span class="status-badge ${status.class}">${status.label}</span>`;
-            } else if (field.isUUID) {
-              cellContent = `<span class="uuid-header value-cell" data-uuid="${product.nfc_uuid}">${product.nfc_uuid}</span>`;
             } else if (field.key === 'data_produzione') {
               const prodDate = product.data_produzione?.toString() || "20230101";
               cellContent = `${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}`;
             } else {
               const value = formatValue(product, field);
               const displayValue = value === '-' ? '<span class="empty-value">-</span>' : value;
-              cellContent = `<span class="value-cell">${displayValue}</span>`;
+              cellContent = displayValue;
             }
             
             bodyHTML += `<td>${cellContent}</td>`;
@@ -555,28 +553,6 @@
         });
         
         tbody.innerHTML = bodyHTML;
-
-        // Aggiungi event listener per click sugli UUID
-        tbody.querySelectorAll('[data-uuid]').forEach(el => {
-          el.addEventListener('click', () => {
-            loadScans(el.dataset.uuid);
-          });
-        });
-      }
-
-      function filterProducts(searchTerm) {
-        if (!searchTerm) {
-          filteredProducts = allProducts;
-        } else {
-          const term = searchTerm.toLowerCase();
-          filteredProducts = allProducts.filter(p => 
-            p.nfc_uuid.toLowerCase().includes(term) ||
-            (PRODUCT_MAP[p.prodotto] || '').toLowerCase().includes(term)
-          );
-        }
-        
-        document.getElementById('productCount').textContent = `${filteredProducts.length} / ${allProducts.length} prodotti`;
-        renderTable(filteredProducts);
       }
 
       async function loadProducts() {
@@ -600,9 +576,6 @@
 
           console.log(`✓ Loaded ${data.length} products`);
           allProducts = data;
-          filteredProducts = data;
-          
-          document.getElementById('productCount').textContent = `${data.length} prodotti`;
           
           renderTable(data);
 
@@ -688,13 +661,9 @@
         `;
       }
 
-      // Event listeners
       document.getElementById('closeScansBtn').addEventListener('click', () => {
         document.getElementById('scansPanel').style.display = 'none';
-      });
-
-      document.getElementById('uuidFilter').addEventListener('input', (e) => {
-        filterProducts(e.target.value.trim());
+        highlightColumn(-1);
       });
 
       document.addEventListener('DOMContentLoaded', () => {
