@@ -32,7 +32,7 @@
       padding: 20px;
     }
 
-    .container { max-width: 1400px; margin: 0 auto; }
+    .container { max-width: 1600px; margin: 0 auto; }
 
     header {
       text-align: center;
@@ -124,15 +124,21 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Table Container for horizontal scroll */
     .table-container {
       background: var(--bg-card);
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      overflow: hidden;
+      overflow-x: auto; /* Added for scrolling */
       margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
 
-    table { width: 100%; border-collapse: collapse; }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      min-width: 1200px; /* Ensures columns don't squash */
+    }
 
     thead { background: var(--primary); }
 
@@ -142,11 +148,13 @@
       font-weight: 600;
       color: var(--text-primary);
       border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
     }
 
     td {
       padding: 14px 16px;
       border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
     tbody tr:hover {
@@ -259,7 +267,7 @@
         <img src="falcord_logo_500.png" alt="Falcord Logo" class="logo-img" />
         <div>
           <h1>Falcord Tracking System</h1>
-          <p class="subtitle">Gestione digitale del ciclo di vita</p>
+          <p class="subtitle">Gestione digitale trasparente del ciclo di vita</p>
         </div>
       </div>
     </header>
@@ -281,7 +289,14 @@
               <th>Prodotto</th>
               <th>Diametro</th>
               <th>Lunghezza</th>
-              <th>Data Produzione</th>
+              <th>Calza</th>
+              <th>Anima</th>
+              <th>Carico Rottura</th>
+              <th>Colore</th>
+              <th>Res. UV</th>
+              <th>Trattamento</th>
+              <th>Galleggiabilità</th>
+              <th>Data Prod.</th>
               <th>Stato</th>
             </tr>
           </thead>
@@ -302,8 +317,8 @@
     </div>
 
     <footer>
-      <p>Falcord Tracking System</p>
-      <p style="margin-top: 8px;">© 2026 Falcord S.r.l.</p>
+      <p>Falcord Tracking System • Gestione Digitale Ciclo di Vita</p>
+      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.2</p>
     </footer>
   </div>
 
@@ -317,14 +332,36 @@
         DB_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c'
       };
 
+      // Mappings
       const PRODUCT_MAP = {
         1: "Mayorca", 2: "Capri", 3: "Mega Yacht", 4: "Megayacht SK",
         5: "Tornado", 6: "Skipper", 7: "Tornado PPL", 8: "Trefil",
         9: "Trefil HT", 10: "Trefil M", 11: "Liberty Oblix", 12: "Liberty SK", 13: "T16"
       };
 
-      const CORE_MAP = {
+      const CALZA_MAP = {
+        1: "Poliestere", 2: "Nylon", 3: "Oblix", 4: "Dyneema SK78"
+      };
+
+      const ANIMA_MAP = {
         1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix"
+      };
+
+      const COLORE_MAP = {
+        1: "Nera", 2: "Blu Navy", 3: "Grigio", 4: "Nero Antracite", 5: "Bianca",
+        6: "Bordeaux", 7: "Gialla", 8: "Arancio", 9: "Rosso", 10: "Azzurro"
+      };
+
+      const UV_MAP = {
+        1: "Scarsa", 2: "Media", 3: "Buona", 4: "Molto Buona", 5: "Ottima", 6: "Eccellente"
+      };
+
+      const TRATTAMENTO_MAP = {
+        1: "Anima Interna Coating", 2: "Treccia Singola Coating", 3: "Senza Anima"
+      };
+
+      const GALLEGG_MAP = {
+        1: "Affondante", 2: "Galleggiante", 3: "Semi Galleggiante"
       };
 
       let dbClient = null;
@@ -390,6 +427,13 @@
                 <td>${PRODUCT_MAP[product.prodotto] || 'Sconosciuto'}</td>
                 <td>${product.diametro} mm</td>
                 <td>${product.lunghezza} m</td>
+                <td>${CALZA_MAP[product.calza] || product.calza || '-'}</td>
+                <td>${ANIMA_MAP[product.anima] || product.anima || '-'}</td>
+                <td>${product.carico_rotture ? product.carico_rotture.toLocaleString('it-IT') + ' kg' : '-'}</td>
+                <td>${COLORE_MAP[product.colore] || product.colore || '-'}</td>
+                <td>${UV_MAP[product.uv_resistance] || product.uv_resistance || '-'}</td>
+                <td>${TRATTAMENTO_MAP[product.trattamento] || product.trattamento || '-'}</td>
+                <td>${GALLEGG_MAP[product.galleggiabilita] || product.galleggiabilita || '-'}</td>
                 <td>${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}</td>
                 <td><span class="status-badge ${status.class}">${status.label}</span></td>
               </tr>
