@@ -70,6 +70,45 @@
       margin-top: 4px;
     }
 
+    /* Search/Filter Section */
+    .filter-section {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+
+    .filter-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .filter-input::placeholder {
+      color: var(--text-secondary);
+    }
+
     .error-box {
       background: rgba(239, 68, 68, 0.1);
       border: 2px solid var(--danger);
@@ -124,57 +163,81 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Table Container for horizontal scroll */
+    /* Transposed Table Layout */
     .table-container {
-      background: var(--bg-card);
+      overflow-x: auto;
+      margin: 20px 0;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      overflow-x: auto; /* Added for scrolling */
-      margin: 20px 0;
+      background: var(--bg-card);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
 
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      min-width: 1200px; /* Ensures columns don't squash */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 600px;
     }
 
-    thead { background: var(--primary); }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      word-wrap: break-word;
+      word-break: break-word;
+      max-width: 140px;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
 
     th {
-      padding: 14px 16px;
-      text-align: left;
-      font-weight: 600;
+      background: var(--primary);
       color: var(--text-primary);
-      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
       white-space: nowrap;
     }
 
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
+    .field-label {
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--primary-dark);
+      min-width: 130px;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      border-right: 2px solid var(--border);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
     }
 
     tbody tr:hover {
-      background: #4a4a4a;
-      cursor: pointer;
+      background: rgba(255, 215, 0, 0.08);
     }
 
-    .uuid-cell {
-      font-family: monospace;
+    .uuid-header {
+      font-family: 'Courier New', monospace;
       color: var(--accent);
+      font-size: 0.75rem;
       background: rgba(255, 215, 0, 0.1);
-      padding: 4px 8px;
+      padding: 6px 8px;
       border-radius: 4px;
+      display: inline-block;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .status-badge {
       display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
       font-weight: 600;
     }
 
@@ -196,6 +259,21 @@
       border: 1px solid var(--danger);
     }
 
+    .value-cell {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .value-cell:hover {
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    .empty-value {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* Scans Panel */
     .scans-panel {
       background: var(--bg-card);
       border-radius: var(--radius);
@@ -258,6 +336,14 @@
       margin-top: 40px;
       border-top: 1px solid var(--border);
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 1.4rem; }
+      .logo-img { width: 50px; height: 50px; }
+      th, td { padding: 8px 10px; font-size: 0.75rem; }
+      .field-label { min-width: 110px; }
+    }
   </style>
 </head>
 <body>
@@ -272,6 +358,12 @@
       </div>
     </header>
 
+    <div class="filter-section">
+      <span class="filter-label">🔍 Filtra per UUID:</span>
+      <input type="text" id="uuidFilter" class="filter-input" placeholder="Inserisci parte dell'UUID per filtrare..." />
+      <span id="productCount" style="color: var(--text-secondary); font-size: 0.9rem; white-space: nowrap;"></span>
+    </div>
+
     <div id="loading" class="loading">
       <div class="spinner"></div>
       <p>Caricamento dati dal database...</p>
@@ -280,27 +372,11 @@
     <div id="error" style="display: none;"></div>
 
     <div id="productsSection" style="display: none;">
-      <h2 style="color: var(--accent); margin: 24px 0 16px;">📦 Prodotti</h2>
+      <h2 style="color: var(--accent); margin: 24px 0 16px; font-size: 1.3rem;">📦 Prodotti</h2>
       <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Tag UUID</th>
-              <th>Prodotto</th>
-              <th>Diametro</th>
-              <th>Lunghezza</th>
-              <th>Calza</th>
-              <th>Anima</th>
-              <th>Carico Rottura</th>
-              <th>Colore</th>
-              <th>Res. UV</th>
-              <th>Trattamento</th>
-              <th>Galleggiabilità</th>
-              <th>Data Prod.</th>
-              <th>Stato</th>
-            </tr>
-          </thead>
-          <tbody id="productsTableBody"></tbody>
+        <table id="productsTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
         </table>
       </div>
 
@@ -318,7 +394,7 @@
 
     <footer>
       <p>Falcord Tracking System • Gestione Digitale Ciclo di Vita</p>
-      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.2</p>
+      <p style="margin-top: 8px;">© 2024 Falcord S.r.l. • v1.3</p>
     </footer>
   </div>
 
@@ -326,13 +402,12 @@
     (function() {
       'use strict';
 
-      // Configuration - Hidden from UI
       const CONFIG = {
         DB_URL: 'https://exshynvdaacktlbwfqrq.supabase.co',
         DB_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c'
       };
 
-      // Mappings
+      // Mappature dai codici Android
       const PRODUCT_MAP = {
         1: "Mayorca", 2: "Capri", 3: "Mega Yacht", 4: "Megayacht SK",
         5: "Tornado", 6: "Skipper", 7: "Tornado PPL", 8: "Trefil",
@@ -364,11 +439,12 @@
         1: "Affondante", 2: "Galleggiante", 3: "Semi Galleggiante"
       };
 
+      let allProducts = [];
+      let filteredProducts = [];
       let dbClient = null;
 
       function initDB() {
         if (dbClient) return dbClient;
-        
         try {
           dbClient = window.supabase.createClient(CONFIG.DB_URL, CONFIG.DB_KEY);
           console.log('✓ Database client initialized');
@@ -395,6 +471,114 @@
         return { label: "Pericolo", class: "status-danger" };
       }
 
+      function formatValue(product, field) {
+        let value = product[field.key];
+        
+        if (value === null || value === undefined) return '-';
+        
+        if (field.map) {
+          value = field.map[value] || value;
+        }
+        
+        if (field.format === 'number' && value) {
+          value = Number(value).toLocaleString('it-IT');
+        }
+        
+        if (field.suffix && value !== '-') {
+          value += field.suffix;
+        }
+        
+        return value;
+      }
+
+      function renderTable(products) {
+        const thead = document.getElementById('tableHead');
+        const tbody = document.getElementById('tableBody');
+        
+        if (!products || products.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:40px;color:var(--text-secondary);">Nessun prodotto trovato</td></tr>';
+          thead.innerHTML = '';
+          return;
+        }
+
+        // Definizione dei campi (righe della tabella trasposta)
+        const fields = [
+          { key: 'nfc_uuid', label: 'Tag UUID', isUUID: true },
+          { key: 'prodotto', label: 'Prodotto', map: PRODUCT_MAP },
+          { key: 'diametro', label: 'Diametro', suffix: ' mm' },
+          { key: 'lunghezza', label: 'Lunghezza', suffix: ' m' },
+          { key: 'calza', label: 'Calza', map: CALZA_MAP },
+          { key: 'anima', label: 'Anima', map: ANIMA_MAP },
+          { key: 'carico_rottura', label: 'Carico Rottura', suffix: ' kg', format: 'number' },
+          { key: 'colore', label: 'Colore', map: COLORE_MAP },
+          { key: 'uv_resistance', label: 'Res. UV', map: UV_MAP },
+          { key: 'trattamento', label: 'Trattamento', map: TRATTAMENTO_MAP },
+          { key: 'galleggiabilita', label: 'Galleggiabilità', map: GALLEGG_MAP },
+          { key: 'data_produzione', label: 'Data Prod.' },
+          { key: 'stato', label: 'Stato', isStatus: true }
+        ];
+
+        // Header (UUIDs come colonne)
+        let headHTML = '<tr><th class="field-label">Campo</th>';
+        products.forEach(p => {
+          headHTML += `<th><span class="uuid-header">${p.nfc_uuid}</span></th>`;
+        });
+        headHTML += '</tr>';
+        thead.innerHTML = headHTML;
+
+        // Body (campi come righe)
+        let bodyHTML = '';
+        fields.forEach(field => {
+          bodyHTML += `<tr><td class="field-label">${field.label}</td>`;
+          
+          products.forEach(product => {
+            let cellContent = '';
+            
+            if (field.isStatus) {
+              const status = calculateStatus(product.data_produzione, product.anima);
+              cellContent = `<span class="status-badge ${status.class}">${status.label}</span>`;
+            } else if (field.isUUID) {
+              cellContent = `<span class="uuid-header value-cell" data-uuid="${product.nfc_uuid}">${product.nfc_uuid}</span>`;
+            } else if (field.key === 'data_produzione') {
+              const prodDate = product.data_produzione?.toString() || "20230101";
+              cellContent = `${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}`;
+            } else {
+              const value = formatValue(product, field);
+              const displayValue = value === '-' ? '<span class="empty-value">-</span>' : value;
+              cellContent = `<span class="value-cell">${displayValue}</span>`;
+            }
+            
+            bodyHTML += `<td>${cellContent}</td>`;
+          });
+          
+          bodyHTML += '</tr>';
+        });
+        
+        tbody.innerHTML = bodyHTML;
+
+        // Aggiungi event listener per click sugli UUID
+        tbody.querySelectorAll('[data-uuid]').forEach(el => {
+          el.addEventListener('click', () => {
+            loadScans(el.dataset.uuid);
+          });
+        });
+      }
+
+      function filterProducts(searchTerm) {
+        if (!searchTerm) {
+          filteredProducts = allProducts;
+        } else {
+          const term = searchTerm.toLowerCase();
+          filteredProducts = allProducts.filter(p => 
+            p.nfc_uuid.toLowerCase().includes(term) ||
+            (PRODUCT_MAP[p.prodotto] || '').toLowerCase().includes(term)
+          );
+        }
+        
+        document.getElementById('productCount').textContent = `${filteredProducts.length} / ${allProducts.length} prodotti`;
+        renderTable(filteredProducts);
+      }
+
       async function loadProducts() {
         const loadingEl = document.getElementById('loading');
         const errorEl = document.getElementById('error');
@@ -415,37 +599,12 @@
           }
 
           console.log(`✓ Loaded ${data.length} products`);
-
-          const tbody = document.getElementById('productsTableBody');
-          tbody.innerHTML = data.map(product => {
-            const status = calculateStatus(product.data_produzione, product.anima);
-            const prodDate = product.data_produzione?.toString() || "20230101";
-            
-            return `
-              <tr data-uuid="${product.nfc_uuid}">
-                <td><span class="uuid-cell">${product.nfc_uuid}</span></td>
-                <td>${PRODUCT_MAP[product.prodotto] || 'Sconosciuto'}</td>
-                <td>${product.diametro} mm</td>
-                <td>${product.lunghezza} m</td>
-                <td>${CALZA_MAP[product.calza] || product.calza || '-'}</td>
-                <td>${ANIMA_MAP[product.anima] || product.anima || '-'}</td>
-                <td>${product.carico_rotture ? product.carico_rotture.toLocaleString('it-IT') + ' kg' : '-'}</td>
-                <td>${COLORE_MAP[product.colore] || product.colore || '-'}</td>
-                <td>${UV_MAP[product.uv_resistance] || product.uv_resistance || '-'}</td>
-                <td>${TRATTAMENTO_MAP[product.trattamento] || product.trattamento || '-'}</td>
-                <td>${GALLEGG_MAP[product.galleggiabilita] || product.galleggiabilita || '-'}</td>
-                <td>${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}</td>
-                <td><span class="status-badge ${status.class}">${status.label}</span></td>
-              </tr>
-            `;
-          }).join('');
-
-          tbody.querySelectorAll('tr').forEach(row => {
-            row.addEventListener('click', () => {
-              const uuid = row.dataset.uuid;
-              loadScans(uuid);
-            });
-          });
+          allProducts = data;
+          filteredProducts = data;
+          
+          document.getElementById('productCount').textContent = `${data.length} prodotti`;
+          
+          renderTable(data);
 
           loadingEl.style.display = 'none';
           productsSectionEl.style.display = 'block';
@@ -529,8 +688,13 @@
         `;
       }
 
+      // Event listeners
       document.getElementById('closeScansBtn').addEventListener('click', () => {
         document.getElementById('scansPanel').style.display = 'none';
+      });
+
+      document.getElementById('uuidFilter').addEventListener('input', (e) => {
+        filterProducts(e.target.value.trim());
       });
 
       document.addEventListener('DOMContentLoaded', () => {
