@@ -32,7 +32,7 @@
       padding: 20px;
     }
 
-    .container { max-width: 1600px; margin: 0 auto; }
+    .container { max-width: 1800px; margin: 0 auto; }
 
     header {
       text-align: center;
@@ -80,11 +80,7 @@
       text-align: left;
     }
 
-    .error-box h3 {
-      color: var(--danger);
-      margin-bottom: 12px;
-    }
-
+    .error-box h3 { color: var(--danger); margin-bottom: 12px; }
     .error-box code {
       background: var(--bg-dark);
       padding: 2px 8px;
@@ -104,7 +100,6 @@
       margin-top: 16px;
       font-size: 1rem;
     }
-
     .retry-btn:hover { opacity: 0.9; }
 
     .loading {
@@ -121,10 +116,8 @@
       margin: 0 auto 20px;
       animation: spin 1s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Table Container */
     .table-container {
       overflow-x: auto;
       margin: 20px 0;
@@ -138,7 +131,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.85rem;
-      min-width: 800px;
+      min-width: 1100px;
     }
 
     th, td {
@@ -147,7 +140,7 @@
       text-align: left;
       word-wrap: break-word;
       word-break: break-word;
-      max-width: 150px;
+      max-width: 200px;
       vertical-align: middle;
       line-height: 1.4;
     }
@@ -162,10 +155,7 @@
       border-bottom: 2px solid var(--accent);
     }
 
-    /* Column highlight */
-    tbody tr:hover td {
-      background: transparent;
-    }
+    tbody tr:hover td { background: transparent; }
 
     .column-highlight {
       background: rgba(255, 215, 0, 0.15) !important;
@@ -176,7 +166,7 @@
     .uuid-header {
       font-family: 'Courier New', monospace;
       color: var(--accent);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       background: rgba(255, 215, 0, 0.1);
       padding: 6px 10px;
       border-radius: 4px;
@@ -185,12 +175,10 @@
       transition: all 0.2s ease;
       border: 1px solid transparent;
     }
-
     .uuid-header:hover {
       background: rgba(255, 215, 0, 0.2);
       border-color: var(--accent);
     }
-
     .uuid-header.active {
       background: rgba(255, 215, 0, 0.3);
       border-color: var(--accent);
@@ -204,24 +192,9 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
-
-    .status-ok {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-      border: 1px solid var(--success);
-    }
-
-    .status-warning {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--warning);
-      border: 1px solid var(--warning);
-    }
-
-    .status-danger {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
+    .status-ok { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
 
     .field-name {
       font-weight: 600;
@@ -232,12 +205,30 @@
       border-radius: 4px;
     }
 
-    .empty-value {
+    .empty-value { color: var(--text-secondary); font-style: italic; }
+    
+    .note-cell {
+      max-width: 200px;
+      font-size: 0.8rem;
       color: var(--text-secondary);
-      font-style: italic;
+      display: block;
+      line-height: 1.3;
+    }
+    
+    .yacht-badge {
+      background: rgba(255, 215, 0, 0.15);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      color: var(--accent);
+      display: inline-block;
     }
 
-    /* Scans Panel */
+    .gassa-value {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
     .scans-panel {
       background: var(--bg-card);
       border-radius: var(--radius);
@@ -271,7 +262,6 @@
       padding: 4px 12px;
       border-radius: 6px;
     }
-
     .close-btn:hover { background: var(--danger); }
 
     .scan-item {
@@ -369,11 +359,11 @@
       };
 
       const CALZA_MAP = {
-        1: "Poliestere", 2: "Nylon", 3: "Oblix", 4: "Dyneema SK78"
+        1: "Poliestere", 2: "Nylon", 3: "Oblix", 4: "Dyneema SK78", 5: "Nessuna - treccia singola"
       };
 
       const ANIMA_MAP = {
-        1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix"
+        1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix", 5: "Nessuna - treccia singola"
       };
 
       const COLORE_MAP = {
@@ -394,6 +384,7 @@
       };
 
       let allProducts = [];
+      let yachtMap = {};
       let dbClient = null;
       let selectedColumnIndex = -1;
 
@@ -430,6 +421,13 @@
         
         if (value === null || value === undefined) return '-';
         
+        // Formattazione speciale per GASSA
+        if (field.key === 'gassa') {
+          const gassaVal = parseInt(value);
+          if (isNaN(gassaVal) || gassaVal === 0) return 'Nessuna';
+          return `<span class="gassa-value">${gassaVal} cm</span>`;
+        }
+        
         if (field.map) {
           value = field.map[value] || value;
         }
@@ -446,21 +444,14 @@
       }
 
       function highlightColumn(columnIndex) {
-        // Remove previous highlight
-        document.querySelectorAll('.column-highlight').forEach(el => {
-          el.classList.remove('column-highlight');
-        });
-        
-        document.querySelectorAll('.uuid-header.active').forEach(el => {
-          el.classList.remove('active');
-        });
+        document.querySelectorAll('.column-highlight').forEach(el => el.classList.remove('column-highlight'));
+        document.querySelectorAll('.uuid-header.active').forEach(el => el.classList.remove('active'));
 
         if (columnIndex === -1) {
           selectedColumnIndex = -1;
           return;
         }
 
-        // Highlight all cells in the column (columnIndex + 1 because first column is field names)
         const rows = document.querySelectorAll('#tableBody tr');
         rows.forEach(row => {
           const cells = row.querySelectorAll('td');
@@ -469,19 +460,42 @@
           }
         });
 
-        // Highlight header
         const headers = document.querySelectorAll('#tableHead th');
         if (headers[columnIndex + 1]) {
           const uuidHeader = headers[columnIndex + 1].querySelector('.uuid-header');
-          if (uuidHeader) {
-            uuidHeader.classList.add('active');
-          }
+          if (uuidHeader) uuidHeader.classList.add('active');
         }
 
         selectedColumnIndex = columnIndex;
       }
 
-      function renderTable(products) {
+      // Carica i nomi degli yacht dalla tabella yacht
+      async function loadYachtNames() {
+        try {
+          const db = initDB();
+          const { data, error } = await db.from('yacht').select('yacht_id, nome_yacht');
+          
+          if (error) {
+            console.warn('⚠️ Could not load yacht names:', error.message);
+            return {};
+          }
+          
+          const map = {};
+          (data || []).forEach(y => { 
+            if (y.yacht_id && y.nome_yacht) {
+              map[y.yacht_id] = y.nome_yacht; 
+            }
+          });
+          console.log(`✓ Loaded ${Object.keys(map).length} yacht names`);
+          return map;
+          
+        } catch (err) {
+          console.warn('⚠️ Error loading yacht names:', err.message);
+          return {};
+        }
+      }
+
+      function renderTable(products, yachtLookup) {
         const thead = document.getElementById('tableHead');
         const tbody = document.getElementById('tableBody');
         
@@ -497,12 +511,15 @@
           { key: 'lunghezza', label: 'Lunghezza', suffix: ' m' },
           { key: 'calza', label: 'Calza', map: CALZA_MAP },
           { key: 'anima', label: 'Anima', map: ANIMA_MAP },
+          { key: 'gassa', label: 'Gassa' },
           { key: 'carico_rottura', label: 'Carico Rottura', suffix: ' kg', format: 'number' },
           { key: 'colore', label: 'Colore', map: COLORE_MAP },
           { key: 'uv_resistance', label: 'Res. UV', map: UV_MAP },
           { key: 'trattamento', label: 'Trattamento', map: TRATTAMENTO_MAP },
           { key: 'galleggiabilita', label: 'Galleggiabilità', map: GALLEGG_MAP },
           { key: 'data_produzione', label: 'Data Prod.' },
+          { key: 'pin', label: 'Yacht', isYacht: true },
+          { key: 'note', label: 'Note', isNote: true },
           { key: 'stato', label: 'Stato', isStatus: true }
         ];
 
@@ -515,7 +532,6 @@
         thead.innerHTML = headHTML;
 
         // Add click listeners to headers
-        headHTML = '';
         document.querySelectorAll('.uuid-header').forEach(header => {
           header.addEventListener('click', () => {
             const idx = parseInt(header.dataset.idx);
@@ -536,6 +552,16 @@
             if (field.isStatus) {
               const status = calculateStatus(product.data_produzione, product.anima);
               cellContent = `<span class="status-badge ${status.class}">${status.label}</span>`;
+            } else if (field.isYacht) {
+              // Usa il campo 'pin' per cercare nella yacht map
+              const yachtPin = product.pin || '';
+              const yachtName = yachtLookup[yachtPin] || (yachtPin ? `PIN: ${yachtPin}` : '-');
+              cellContent = yachtName !== '-' ? `<span class="yacht-badge">${yachtName}</span>` : '<span class="empty-value">-</span>';
+            } else if (field.isNote) {
+              // Note: testo lungo con word-wrap
+              const noteText = product.note || '';
+              const displayNote = noteText === '' ? '<span class="empty-value">-</span>' : noteText;
+              cellContent = `<span class="note-cell">${displayNote}</span>`;
             } else if (field.key === 'data_produzione') {
               const prodDate = product.data_produzione?.toString() || "20230101";
               cellContent = `${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}`;
@@ -563,6 +589,10 @@
           console.log('Loading products...');
           const db = initDB();
 
+          // Carica prima i nomi degli yacht
+          const yachtLookup = await loadYachtNames();
+
+          // Query products
           const { data, error } = await db
             .from('products')
             .select('*')
@@ -576,7 +606,7 @@
           console.log(`✓ Loaded ${data.length} products`);
           allProducts = data;
           
-          renderTable(data);
+          renderTable(data, yachtLookup);
 
           loadingEl.style.display = 'none';
           productsSectionEl.style.display = 'block';
@@ -629,6 +659,7 @@
               <div class="scan-item">
                 <div class="scan-time">📅 ${formattedTime}</div>
                 <div class="scan-meta">👤 Operatore: ${scan.operator_id || 'Non specificato'}</div>
+                ${scan.location ? `<div class="scan-meta">📍 ${scan.location}</div>` : ''}
               </div>
             `;
           }).join('');
@@ -646,7 +677,6 @@
           <div class="error-box">
             <h3>❌ Errore di Connessione</h3>
             <p><strong>Dettaglio:</strong> <code>${message}</code></p>
-            
             <h4 style="margin:16px 0 8px;color:var(--warning);">Possibili Soluzioni:</h4>
             <ul style="margin-left:20px;color:var(--text-secondary);">
               <li>Verifica la connessione internet</li>
@@ -654,7 +684,6 @@
               <li>Assicurati che le tabelle esistano nel database</li>
               <li>Verifica i permessi di accesso al database</li>
             </ul>
-            
             <button class="retry-btn" onclick="location.reload()">🔄 Riprova</button>
           </div>
         `;
