@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Falcord Tracking System</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4a4a4a;
+      --primary-dark: #2d2d2d;
+      --accent: #FFD700;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg-dark: #2d2d2d;
+      --bg-card: #3a3a3a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border: #555555;
+      --radius: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a1a 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1800px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      padding: 24px 20px 32px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 24px;
+      background: var(--primary-dark);
+      border-radius: var(--radius);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .logo-img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 20px auto;
+      max-width: 800px;
+      text-align: left;
+    }
+
+    .error-box h3 { color: var(--danger); margin-bottom: 12px; }
+    .error-box code {
+      background: var(--bg-dark);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: var(--warning);
+    }
+
+    .retry-btn {
+      background: var(--accent);
+      color: var(--primary-dark);
+      border: none;
+      padding: 10px 24px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+      font-size: 1rem;
+    }
+    .retry-btn:hover { opacity: 0.9; }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .table-container {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 1100px;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      word-wrap: break-word;
+      word-break: break-word;
+      max-width: 200px;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+
+    th {
+      background: var(--primary);
+      color: var(--text-primary);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    tbody tr:hover td { background: transparent; }
+
+    .column-highlight {
+      background: rgba(255, 215, 0, 0.15) !important;
+      border-left: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+    }
+
+    .uuid-header {
+      font-family: 'Courier New', monospace;
+      color: var(--accent);
+      font-size: 0.75rem;
+      background: rgba(255, 215, 0, 0.1);
+      padding: 6px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .uuid-header:hover {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: var(--accent);
+    }
+    .uuid-header.active {
+      background: rgba(255, 215, 0, 0.3);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-ok { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+    .field-name {
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+      background: var(--primary-dark);
+      padding: 6px 10px;
+      border-radius: 4px;
+      display: block;
+      line-height: 1.3;
+    }
+
+    .field-name.multiline {
+      white-space: normal;
+    }
+
+    .empty-value { color: var(--text-secondary); font-style: italic; }
+    
+    .note-cell {
+      max-width: 200px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: block;
+      line-height: 1.3;
+    }
+    
+    .yacht-badge {
+      background: rgba(255, 215, 0, 0.15);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      color: var(--accent);
+      display: inline-block;
+    }
+
+    .gassa-value {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .scans-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 2px solid var(--accent);
+      padding: 20px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .scans-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scans-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .close-btn {
+      background: var(--primary);
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .close-btn:hover { background: var(--danger); }
+
+    .scan-item {
+      background: var(--bg-dark);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .scan-time {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .scan-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-secondary);
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.4rem; }
+      .logo-img { width: 50px; height: 50px; }
+      th, td { padding: 10px 12px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-container">
+        <img src="falcord_logo_500.png" alt="Falcord Logo" class="logo-img" />
+        <div>
+          <h1>Falcord Tracking System</h1>
+          <p class="subtitle">Gestione digitale del ciclo di vita</p>
+        </div>
+      </div>
+    </header>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Caricamento dati dal database...</p>
+    </div>
+
+    <div id="error" style="display: none;"></div>
+
+    <div id="productsSection" style="display: none;">
+      <h2 style="color: var(--accent); margin: 24px 0 16px; font-size: 1.3rem;">📦 Prodotti</h2>
+      <div class="table-container">
+        <table id="productsTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="scansPanel" class="scans-panel">
+        <div class="scans-header">
+          <div>
+            <div class="scans-title">🔍 Storico Scansioni</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;" id="scansUuid"></div>
+          </div>
+          <button class="close-btn" id="closeScansBtn">×</button>
+        </div>
+        <div id="scansList"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-top: 8px;">© 2026 Falcord S.r.l.</p>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      const CONFIG = {
+        DB_URL: 'https://exshynvdaacktlbwfqrq.supabase.co',
+        DB_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4c2h5bnZkYWFja3RsYndmcXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODI4MDcsImV4cCI6MjA4OTI1ODgwN30.KOGEWBVqh_JGOlb-lhhVM2mcFmmIMToCGbFk6s0cE-c'
+      };
+
+      const PRODUCT_MAP = {
+        1: "Mayorca", 2: "Capri", 3: "Mega Yacht", 4: "Megayacht SK",
+        5: "Tornado", 6: "Skipper", 7: "Tornado PPL", 8: "Trefil",
+        9: "Trefil HT", 10: "Trefil M", 11: "Liberty Oblix", 12: "Liberty SK", 13: "T16"
+      };
+
+      const CALZA_MAP = {
+        1: "Poliestere", 2: "Nylon", 3: "Oblix", 4: "Dyneema SK78", 5: "Nessuna - treccia singola"
+      };
+
+      const ANIMA_MAP = {
+        1: "Poliestere", 2: "Nylon", 3: "Dyneema SK78", 4: "HMWPE Oblix", 5: "Nessuna - treccia singola"
+      };
+
+      const COLORE_MAP = {
+        1: "Nera", 2: "Blu Navy", 3: "Grigio", 4: "Nero Antracite", 5: "Bianca",
+        6: "Bordeaux", 7: "Gialla", 8: "Arancio", 9: "Rosso", 10: "Azzurro"
+      };
+
+      const UV_MAP = {
+        1: "Scarsa", 2: "Media", 3: "Buona", 4: "Molto Buona", 5: "Ottima", 6: "Eccellente"
+      };
+
+      const TRATTAMENTO_MAP = {
+        1: "Anima Interna Coating", 2: "Treccia Singola Coating", 3: "Senza Anima", 4: "Senza Trattamento"
+      };
+
+      const GALLEGG_MAP = {
+        1: "Affondante", 2: "Galleggiante", 3: "Semi Galleggiante"
+      };
+
+      let allProducts = [];
+      let yachtMap = {};
+      let dbClient = null;
+      let selectedColumnIndex = -1;
+
+      function initDB() {
+        if (dbClient) return dbClient;
+        try {
+          dbClient = window.supabase.createClient(CONFIG.DB_URL, CONFIG.DB_KEY);
+          console.log('✓ Database client initialized');
+          return dbClient;
+        } catch (error) {
+          console.error('✗ Database initialization failed:', error);
+          throw error;
+        }
+      }
+
+      function calculateStatus(prodDateInt, coreCode) {
+        const prodYear = Math.floor(prodDateInt / 10000);
+        const prodMonth = Math.floor((prodDateInt % 10000) / 100);
+        const prodDate = new Date(prodYear, prodMonth - 1, 1);
+        const today = new Date();
+        
+        const ageYears = (today - prodDate) / (1000 * 60 * 60 * 24 * 365.25);
+        let lifespan = 5.0;
+        
+        if ([3, 4].includes(coreCode)) lifespan += 2.0;
+        
+        if (ageYears < lifespan - 2) return { label: "OK", class: "status-ok" };
+        if (ageYears < lifespan) return { label: "Attenzione", class: "status-warning" };
+        return { label: "Pericolo", class: "status-danger" };
+      }
+
+      function formatValue(product, field) {
+        let value = product[field.key];
+        
+        if (value === null || value === undefined) return '-';
+        
+        // Formattazione speciale per GASSA
+        if (field.key === 'gassa') {
+          const gassaVal = parseInt(value);
+          if (isNaN(gassaVal) || gassaVal === 0) return 'Nessuna';
+          return `<span class="gassa-value">${gassaVal} cm</span>`;
+        }
+        
+        if (field.map) {
+          value = field.map[value] || value;
+        }
+        
+        if (field.format === 'number' && value) {
+          value = Number(value).toLocaleString('it-IT');
+        }
+        
+        if (field.suffix && value !== '-') {
+          value += field.suffix;
+        }
+        
+        return value;
+      }
+
+      function highlightColumn(columnIndex) {
+        document.querySelectorAll('.column-highlight').forEach(el => el.classList.remove('column-highlight'));
+        document.querySelectorAll('.uuid-header.active').forEach(el => el.classList.remove('active'));
+
+        if (columnIndex === -1) {
+          selectedColumnIndex = -1;
+          return;
+        }
+
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells[columnIndex + 1]) {
+            cells[columnIndex + 1].classList.add('column-highlight');
+          }
+        });
+
+        const headers = document.querySelectorAll('#tableHead th');
+        if (headers[columnIndex + 1]) {
+          const uuidHeader = headers[columnIndex + 1].querySelector('.uuid-header');
+          if (uuidHeader) uuidHeader.classList.add('active');
+        }
+
+        selectedColumnIndex = columnIndex;
+      }
+
+      // Carica i nomi degli yacht dalla tabella yacht
+      async function loadYachtNames() {
+        try {
+          const db = initDB();
+          const { data, error } = await db.from('yacht').select('yacht_id, nome_yacht');
+          
+          if (error) {
+            console.warn('⚠️ Could not load yacht names:', error.message);
+            return {};
+          }
+          
+          const map = {};
+          (data || []).forEach(y => { 
+            if (y.yacht_id && y.nome_yacht) {
+              map[y.yacht_id] = y.nome_yacht; 
+            }
+          });
+          console.log(`✓ Loaded ${Object.keys(map).length} yacht names`);
+          return map;
+          
+        } catch (err) {
+          console.warn('⚠️ Error loading yacht names:', err.message);
+          return {};
+        }
+      }
+
+      function renderTable(products, yachtLookup) {
+        const thead = document.getElementById('tableHead');
+        const tbody = document.getElementById('tableBody');
+        
+        if (!products || products.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:40px;color:var(--text-secondary);">Nessun prodotto trovato</td></tr>';
+          thead.innerHTML = '';
+          return;
+        }
+
+        const fields = [
+          { key: 'prodotto', label: 'Prodotto', map: PRODUCT_MAP },
+          { key: 'diametro', label: 'Diametro', suffix: ' mm' },
+          { key: 'lunghezza', label: 'Lunghezza', suffix: ' m' },
+          { key: 'calza', label: 'Calza', map: CALZA_MAP },
+          { key: 'anima', label: 'Anima', map: ANIMA_MAP },
+          { key: 'gassa', label: 'Gassa' },
+          { 
+            key: 'carico_rottura', 
+            label: 'Carico Rottura (Falcord)<br><span style="font-size:0.75rem;color:var(--text-secondary);font-weight:400;">Coeff.Sicurezza di lavoro 7:1</span>', 
+            suffix: ' kg', 
+            format: 'number',
+            multiline: true
+          },
+          { key: 'colore', label: 'Colore', map: COLORE_MAP },
+          { key: 'uv_resistance', label: 'Res. UV', map: UV_MAP },
+          { key: 'trattamento', label: 'Trattamento', map: TRATTAMENTO_MAP },
+          { key: 'galleggiabilita', label: 'Galleggiabilità', map: GALLEGG_MAP },
+          { key: 'data_produzione', label: 'Data Prod.' },
+          { key: 'pin', label: 'Yacht', isYacht: true },
+          { key: 'note', label: 'Note', isNote: true },
+          { key: 'stato', label: 'Stato', isStatus: true }
+        ];
+
+        // Header (UUIDs come colonne)
+        let headHTML = '<tr><th style="min-width: 120px;">Campo</th>';
+        products.forEach((p, idx) => {
+          headHTML += `<th><span class="uuid-header" data-idx="${idx}" data-uuid="${p.nfc_uuid}">${p.nfc_uuid}</span></th>`;
+        });
+        headHTML += '</tr>';
+        thead.innerHTML = headHTML;
+
+        // Add click listeners to headers
+        document.querySelectorAll('.uuid-header').forEach(header => {
+          header.addEventListener('click', () => {
+            const idx = parseInt(header.dataset.idx);
+            const uuid = header.dataset.uuid;
+            highlightColumn(idx);
+            loadScans(uuid);
+          });
+        });
+
+        // Body (campi come righe)
+        let bodyHTML = '';
+        fields.forEach(field => {
+          const multilineClass = field.multiline ? 'multiline' : '';
+          bodyHTML += `<tr><td><span class="field-name ${multilineClass}">${field.label}</span></td>`;
+          
+          products.forEach(product => {
+            let cellContent = '';
+            
+            if (field.isStatus) {
+              const status = calculateStatus(product.data_produzione, product.anima);
+              cellContent = `<span class="status-badge ${status.class}">${status.label}</span>`;
+            } else if (field.isYacht) {
+              // Usa il campo 'pin' per cercare nella yacht map
+              const yachtPin = product.pin || '';
+              const yachtName = yachtLookup[yachtPin] || (yachtPin ? `PIN: ${yachtPin}` : '-');
+              cellContent = yachtName !== '-' ? `<span class="yacht-badge">${yachtName}</span>` : '<span class="empty-value">-</span>';
+            } else if (field.isNote) {
+              // Note: testo lungo con word-wrap
+              const noteText = product.note || '';
+              const displayNote = noteText === '' ? '<span class="empty-value">-</span>' : noteText;
+              cellContent = `<span class="note-cell">${displayNote}</span>`;
+            } else if (field.key === 'data_produzione') {
+              const prodDate = product.data_produzione?.toString() || "20230101";
+              cellContent = `${prodDate.substring(0, 4)}-${prodDate.substring(4, 6)}`;
+            } else {
+              const value = formatValue(product, field);
+              const displayValue = value === '-' ? '<span class="empty-value">-</span>' : value;
+              cellContent = displayValue;
+            }
+            
+            bodyHTML += `<td>${cellContent}</td>`;
+          });
+          
+          bodyHTML += '</tr>';
+        });
+        
+        tbody.innerHTML = bodyHTML;
+      }
+
+      async function loadProducts() {
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        const productsSectionEl = document.getElementById('productsSection');
+
+        try {
+          console.log('Loading products...');
+          const db = initDB();
+
+          // Carica prima i nomi degli yacht
+          const yachtLookup = await loadYachtNames();
+
+          // Query products
+          const { data, error } = await db
+            .from('products')
+            .select('*')
+            .order('data_creazione', { ascending: false });
+
+          if (error) throw error;
+          if (!data || data.length === 0) {
+            throw new Error('Nessun prodotto trovato nel database');
+          }
+
+          console.log(`✓ Loaded ${data.length} products`);
+          allProducts = data;
+          
+          renderTable(data, yachtLookup);
+
+          loadingEl.style.display = 'none';
+          productsSectionEl.style.display = 'block';
+
+        } catch (err) {
+          console.error('Error:', err);
+          showError(err.message);
+          loadingEl.style.display = 'none';
+        }
+      }
+
+      async function loadScans(tagUuid) {
+        const panel = document.getElementById('scansPanel');
+        const list = document.getElementById('scansList');
+        const uuidDisplay = document.getElementById('scansUuid');
+
+        console.log(`Loading scans for: ${tagUuid}`);
+        
+        uuidDisplay.textContent = `UUID: ${tagUuid}`;
+        list.innerHTML = '<div class="loading"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto;"></div></div>';
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        try {
+          const db = initDB();
+          
+          const { data, error } = await db
+            .from('scans')
+            .select('*')
+            .eq('nfc_uuid', tagUuid)
+            .order('scan_time', { ascending: false });
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary);">Nessuna scansione registrata</div>';
+            return;
+          }
+
+          console.log(`✓ Loaded ${data.length} scans`);
+
+          list.innerHTML = data.map(scan => {
+            const scanDate = new Date(scan.scan_time);
+            const formattedTime = scanDate.toLocaleString('it-IT', {
+              day: '2-digit', month: 'short', year: 'numeric',
+              hour: '2-digit', minute: '2-digit'
+            });
+            
+            return `
+              <div class="scan-item">
+                <div class="scan-time">📅 ${formattedTime}</div>
+                <div class="scan-meta">👤 Operatore: ${scan.operator_id || 'Non specificato'}</div>
+                ${scan.location ? `<div class="scan-meta">📍 ${scan.location}</div>` : ''}
+              </div>
+            `;
+          }).join('');
+
+        } catch (err) {
+          console.error('Error loading scans:', err);
+          list.innerHTML = `<div style="color:var(--danger);padding:16px;">Errore: ${err.message}</div>`;
+        }
+      }
+
+      function showError(message) {
+        const errorEl = document.getElementById('error');
+        errorEl.style.display = 'block';
+        errorEl.innerHTML = `
+          <div class="error-box">
+            <h3>❌ Errore di Connessione</h3>
+            <p><strong>Dettaglio:</strong> <code>${message}</code></p>
+            <h4 style="margin:16px 0 8px;color:var(--warning);">Possibili Soluzioni:</h4>
+            <ul style="margin-left:20px;color:var(--text-secondary);">
+              <li>Verifica la connessione internet</li>
+              <li>Controlla che il database sia accessibile</li>
+              <li>Assicurati che le tabelle esistano nel database</li>
+              <li>Verifica i permessi di accesso al database</li>
+            </ul>
+            <button class="retry-btn" onclick="location.reload()">🔄 Riprova</button>
+          </div>
+        `;
+      }
+
+      document.getElementById('closeScansBtn').addEventListener('click', () => {
+        document.getElementById('scansPanel').style.display = 'none';
+        highlightColumn(-1);
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('=== Falcord Tracking System ===');
+        loadProducts();
+      });
+
+    })();
+  </script>
+</body>
+</html>
