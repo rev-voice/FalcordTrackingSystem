@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Falcord Tracking System</title>
+  <title>Falcord Tracking System - Accesso Cliente</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -34,6 +34,7 @@
 
     .container { max-width: 1800px; margin: 0 auto; }
 
+    /* Header & Footer - same as admin */
     header {
       text-align: center;
       padding: 24px 20px 32px;
@@ -70,54 +71,147 @@
       margin-top: 4px;
     }
 
-    .error-box {
-      background: rgba(239, 68, 68, 0.1);
-      border: 2px solid var(--danger);
-      border-radius: var(--radius);
+    footer {
+      text-align: center;
       padding: 24px;
-      margin: 20px auto;
-      max-width: 800px;
+      color: var(--text-secondary);
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Login Form Styles */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 40px 20px;
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 40px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .login-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
       text-align: left;
     }
 
-    .error-box h3 { color: var(--danger); margin-bottom: 12px; }
-    .error-box code {
-      background: var(--bg-dark);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-family: monospace;
-      color: var(--warning);
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
 
-    .retry-btn {
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      letter-spacing: 2px;
+      color: var(--text-secondary);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px 24px;
       background: var(--accent);
       color: var(--primary-dark);
       border: none;
-      padding: 10px 24px;
       border-radius: var(--radius);
       font-weight: 600;
-      cursor: pointer;
-      margin-top: 16px;
       font-size: 1rem;
-    }
-    .retry-btn:hover { opacity: 0.9; }
-
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid var(--border);
+    .login-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-top: 16px;
+      color: var(--danger);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
-      margin: 0 auto 20px;
       animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
     }
+
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Products Section - same as admin */
     .table-container {
       overflow-x: auto;
       margin: 20px 0;
@@ -289,18 +383,16 @@
       color: var(--text-secondary);
     }
 
-    footer {
-      text-align: center;
-      padding: 24px;
-      color: var(--text-secondary);
-      margin-top: 40px;
-      border-top: 1px solid var(--border);
-    }
+    /* Utility */
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-24 { margin-top: 24px; }
 
     @media (max-width: 768px) {
       h1 { font-size: 1.4rem; }
       .logo-img { width: 50px; height: 50px; }
       th, td { padding: 10px 12px; font-size: 0.8rem; }
+      .login-card { padding: 30px 24px; }
     }
   </style>
 </head>
@@ -316,15 +408,55 @@
       </div>
     </header>
 
-    <div id="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Caricamento dati dal database...</p>
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="login-container">
+      <div class="login-card">
+        <div class="login-title">🔐 Accesso Cliente</div>
+        <p class="login-subtitle">Inserisci il tuo PIN a 4 caratteri per visualizzare le corde associate al tuo yacht.</p>
+        
+        <form id="pinForm">
+          <div class="form-group">
+            <label class="form-label" for="pinInput">PIN</label>
+            <input 
+              type="text" 
+              id="pinInput" 
+              class="form-input" 
+              placeholder="••••" 
+              maxlength="4" 
+              pattern="[A-Za-z0-9]{4}"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <button type="submit" id="loginBtn" class="login-btn">
+            Accedi
+          </button>
+        </form>
+        
+        <div id="loginError" class="error-message">
+          ❌ PIN non valido. Controlla e riprova.
+        </div>
+      </div>
     </div>
 
-    <div id="error" style="display: none;"></div>
+    <!-- LOADING -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Caricamento dati...</p>
+    </div>
 
-    <div id="productsSection" style="display: none;">
-      <h2 style="color: var(--accent); margin: 24px 0 16px; font-size: 1.3rem;">📦 Prodotti</h2>
+    <!-- ERROR -->
+    <div id="error" class="error-box hidden"></div>
+
+    <!-- PRODUCTS SECTION (hidden until login) -->
+    <div id="productsSection" class="hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin: 24px 0 16px;">
+        <h2 style="color: var(--accent); font-size: 1.3rem; margin: 0;">📦 Le tue Corde</h2>
+        <button id="logoutBtn" style="background: var(--primary); color: var(--text-primary); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">🚪 Esci</button>
+      </div>
+      
+      <div id="yachtInfo" style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.95rem;"></div>
+      
       <div class="table-container">
         <table id="productsTable">
           <thead id="tableHead"></thead>
@@ -389,16 +521,15 @@
         1: "Affondante", 2: "Galleggiante", 3: "Semi Galleggiante"
       };
 
-      let allProducts = [];
-      let yachtMap = {};
       let dbClient = null;
       let selectedColumnIndex = -1;
+      let currentPin = null;
+      let yachtName = null;
 
       function initDB() {
         if (dbClient) return dbClient;
         try {
           dbClient = window.supabase.createClient(CONFIG.DB_URL, CONFIG.DB_KEY);
-          console.log('✓ Database client initialized');
           return dbClient;
         } catch (error) {
           console.error('✗ Database initialization failed:', error);
@@ -427,7 +558,6 @@
         
         if (value === null || value === undefined) return '-';
         
-        // Formattazione speciale per GASSA
         if (field.key === 'gassa') {
           const gassaVal = parseInt(value);
           if (isNaN(gassaVal) || gassaVal === 0) return 'Nessuna';
@@ -475,38 +605,12 @@
         selectedColumnIndex = columnIndex;
       }
 
-      // Carica i nomi degli yacht dalla tabella yacht
-      async function loadYachtNames() {
-        try {
-          const db = initDB();
-          const { data, error } = await db.from('yacht').select('yacht_id, nome_yacht');
-          
-          if (error) {
-            console.warn('⚠️ Could not load yacht names:', error.message);
-            return {};
-          }
-          
-          const map = {};
-          (data || []).forEach(y => { 
-            if (y.yacht_id && y.nome_yacht) {
-              map[y.yacht_id] = y.nome_yacht; 
-            }
-          });
-          console.log(`✓ Loaded ${Object.keys(map).length} yacht names`);
-          return map;
-          
-        } catch (err) {
-          console.warn('⚠️ Error loading yacht names:', err.message);
-          return {};
-        }
-      }
-
-      function renderTable(products, yachtLookup) {
+      function renderTable(products) {
         const thead = document.getElementById('tableHead');
         const tbody = document.getElementById('tableBody');
         
         if (!products || products.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:40px;color:var(--text-secondary);">Nessun prodotto trovato</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:40px;color:var(--text-secondary);">Nessuna corda trovata per questo yacht</td></tr>';
           thead.innerHTML = '';
           return;
         }
@@ -535,7 +639,6 @@
           { key: 'stato', label: 'Stato', isStatus: true }
         ];
 
-        // Header (UUIDs come colonne)
         let headHTML = '<tr><th style="min-width: 120px;">Campo</th>';
         products.forEach((p, idx) => {
           headHTML += `<th><span class="uuid-header" data-idx="${idx}" data-uuid="${p.nfc_uuid}">${p.nfc_uuid}</span></th>`;
@@ -543,7 +646,6 @@
         headHTML += '</tr>';
         thead.innerHTML = headHTML;
 
-        // Add click listeners to headers
         document.querySelectorAll('.uuid-header').forEach(header => {
           header.addEventListener('click', () => {
             const idx = parseInt(header.dataset.idx);
@@ -553,7 +655,6 @@
           });
         });
 
-        // Body (campi come righe)
         let bodyHTML = '';
         fields.forEach(field => {
           const multilineClass = field.multiline ? 'multiline' : '';
@@ -566,12 +667,9 @@
               const status = calculateStatus(product.data_produzione, product.anima);
               cellContent = `<span class="status-badge ${status.class}">${status.label}</span>`;
             } else if (field.isYacht) {
-              // Usa il campo 'pin' per cercare nella yacht map
               const yachtPin = product.pin || '';
-              const yachtName = yachtLookup[yachtPin] || (yachtPin ? `PIN: ${yachtPin}` : '-');
-              cellContent = yachtName !== '-' ? `<span class="yacht-badge">${yachtName}</span>` : '<span class="empty-value">-</span>';
+              cellContent = yachtPin ? `<span class="yacht-badge">${yachtName || yachtPin}</span>` : '<span class="empty-value">-</span>';
             } else if (field.isNote) {
-              // Note: testo lungo con word-wrap
               const noteText = product.note || '';
               const displayNote = noteText === '' ? '<span class="empty-value">-</span>' : noteText;
               cellContent = `<span class="note-cell">${displayNote}</span>`;
@@ -593,41 +691,47 @@
         tbody.innerHTML = bodyHTML;
       }
 
-      async function loadProducts() {
+      async function loadProductsForPin(pin) {
         const loadingEl = document.getElementById('loading');
         const errorEl = document.getElementById('error');
         const productsSectionEl = document.getElementById('productsSection');
+        const yachtInfoEl = document.getElementById('yachtInfo');
 
         try {
-          console.log('Loading products...');
           const db = initDB();
 
-          // Carica prima i nomi degli yacht
-          const yachtLookup = await loadYachtNames();
+          // First, verify the PIN exists in yacht table
+          const { data: yachtData, error: yachtError } = await db
+            .from('yacht')
+            .select('yacht_id, nome_yacht')
+            .eq('yacht_id', pin)
+            .single();
 
-          // Query products
+          if (yachtError || !yachtData) {
+            throw new Error('PIN non trovato');
+          }
+
+          yachtName = yachtData.nome_yacht || pin;
+          yachtInfoEl.textContent = `🛥️ Yacht: ${yachtName} • PIN: ${pin}`;
+
+          // Now load products for this PIN
           const { data, error } = await db
             .from('products')
             .select('*')
+            .eq('pin', pin)
             .order('data_creazione', { ascending: false });
 
           if (error) throw error;
-          if (!data || data.length === 0) {
-            throw new Error('Nessun prodotto trovato nel database');
-          }
 
-          console.log(`✓ Loaded ${data.length} products`);
-          allProducts = data;
-          
-          renderTable(data, yachtLookup);
+          renderTable(data || []);
 
-          loadingEl.style.display = 'none';
-          productsSectionEl.style.display = 'block';
+          loadingEl.classList.add('hidden');
+          productsSectionEl.classList.remove('hidden');
 
         } catch (err) {
           console.error('Error:', err);
-          showError(err.message);
-          loadingEl.style.display = 'none';
+          showError(err.message || 'Errore durante il caricamento');
+          loadingEl.classList.add('hidden');
         }
       }
 
@@ -636,8 +740,6 @@
         const list = document.getElementById('scansList');
         const uuidDisplay = document.getElementById('scansUuid');
 
-        console.log(`Loading scans for: ${tagUuid}`);
-        
         uuidDisplay.textContent = `UUID: ${tagUuid}`;
         list.innerHTML = '<div class="loading"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto;"></div></div>';
         panel.style.display = 'block';
@@ -658,8 +760,6 @@
             list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary);">Nessuna scansione registrata</div>';
             return;
           }
-
-          console.log(`✓ Loaded ${data.length} scans`);
 
           list.innerHTML = data.map(scan => {
             const scanDate = new Date(scan.scan_time);
@@ -685,31 +785,103 @@
 
       function showError(message) {
         const errorEl = document.getElementById('error');
-        errorEl.style.display = 'block';
+        errorEl.classList.remove('hidden');
         errorEl.innerHTML = `
-          <div class="error-box">
-            <h3>❌ Errore di Connessione</h3>
-            <p><strong>Dettaglio:</strong> <code>${message}</code></p>
-            <h4 style="margin:16px 0 8px;color:var(--warning);">Possibili Soluzioni:</h4>
-            <ul style="margin-left:20px;color:var(--text-secondary);">
-              <li>Verifica la connessione internet</li>
-              <li>Controlla che il database sia accessibile</li>
-              <li>Assicurati che le tabelle esistano nel database</li>
-              <li>Verifica i permessi di accesso al database</li>
-            </ul>
-            <button class="retry-btn" onclick="location.reload()">🔄 Riprova</button>
-          </div>
+          <h3>❌ Errore</h3>
+          <p><strong>Dettaglio:</strong> <code>${message}</code></p>
+          <button class="retry-btn" onclick="location.reload()" style="margin-top:16px;">🔄 Riprova</button>
         `;
       }
+
+      function showLoginError() {
+        const errorEl = document.getElementById('loginError');
+        errorEl.classList.add('show');
+        setTimeout(() => errorEl.classList.remove('show'), 3000);
+      }
+
+      function hideLoginError() {
+        document.getElementById('loginError').classList.remove('show');
+      }
+
+      function setLoginLoading(loading) {
+        const btn = document.getElementById('loginBtn');
+        if (loading) {
+          btn.disabled = true;
+          btn.innerHTML = '<span class="loading-spinner"></span>Verifica...';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Accedi';
+        }
+      }
+
+      // Event Listeners
+      document.getElementById('pinForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideLoginError();
+        
+        const pinInput = document.getElementById('pinInput');
+        const pin = pinInput.value.trim().toUpperCase();
+        
+        // Validate PIN format
+        if (!/^[A-Z0-9]{4}$/.test(pin)) {
+          pinInput.focus();
+          showLoginError();
+          document.querySelector('#loginError').textContent = '❌ PIN non valido. Deve contenere 4 caratteri alfanumerici.';
+          return;
+        }
+        
+        setLoginLoading(true);
+        
+        try {
+          await loadProductsForPin(pin);
+          currentPin = pin;
+          
+          // Hide login, show products
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('productsSection').classList.remove('hidden');
+          
+        } catch (err) {
+          showLoginError();
+          document.querySelector('#loginError').textContent = '❌ PIN non trovato. Controlla e riprova.';
+          pinInput.focus();
+          pinInput.select();
+        } finally {
+          setLoginLoading(false);
+        }
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        currentPin = null;
+        yachtName = null;
+        selectedColumnIndex = -1;
+        
+        document.getElementById('productsSection').classList.add('hidden');
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('pinInput').value = '';
+        document.getElementById('scansPanel').style.display = 'none';
+        hideLoginError();
+      });
 
       document.getElementById('closeScansBtn').addEventListener('click', () => {
         document.getElementById('scansPanel').style.display = 'none';
         highlightColumn(-1);
       });
 
+      // Input formatting: auto-uppercase and limit to 4 chars
+      document.getElementById('pinInput').addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase().slice(0, 4);
+      });
+
+      // Allow only alphanumeric
+      document.getElementById('pinInput').addEventListener('keypress', function(e) {
+        if (!/[A-Za-z0-9]/.test(e.key)) {
+          e.preventDefault();
+        }
+      });
+
       document.addEventListener('DOMContentLoaded', () => {
-        console.log('=== Falcord Tracking System ===');
-        loadProducts();
+        console.log('=== Falcord Client Login ===');
+        document.getElementById('pinInput').focus();
       });
 
     })();
