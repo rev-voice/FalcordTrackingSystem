@@ -470,6 +470,7 @@
         <button id="logoutBtn" style="background: var(--primary); color: var(--text-primary); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">🚪 Esci</button>
       </div>
       
+      <!-- Yacht info line hidden via CSS -->
       <div id="yachtInfo" style="display: none;"></div>
       
       <div class="table-container">
@@ -584,8 +585,8 @@
         }
         
         if (field.format === 'number' && value) {
-          // FIX 3: Remove thousands separator - just show raw number
-          value = Number(value).toString();
+          // Remove thousands separator - show raw number without dots
+          value = value.toString().replace(/\./g, '');
         }
         
         if (field.suffix && value !== '-') {
@@ -716,7 +717,8 @@
         try {
           const db = initDB();
 
-          const {  yachtData, error: yachtError } = await db
+          // ✅ FIX: Correct Supabase destructuring syntax
+          const { data: yachtData, error: yachtError } = await db
             .from('yacht')
             .select('yacht_id, nome_yacht')
             .eq('yacht_id', pin)
@@ -727,8 +729,9 @@
           }
 
           yachtName = yachtData.nome_yacht || pin;
-          // FIX 1: Removed yacht info display
-          // yachtInfoEl.textContent = `🛥️ Yacht: ${yachtName} • PIN: ${pin}`;
+          
+          // Keep the assignment but element is hidden via CSS (display: none)
+          yachtInfoEl.textContent = `🛥️ Yacht: ${yachtName} • PIN: ${pin}`;
 
           // Now load products for this PIN
           const { data, error } = await db
