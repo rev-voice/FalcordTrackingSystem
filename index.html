@@ -460,8 +460,8 @@
       <p>Caricamento dati...</p>
     </div>
 
-    <!-- ERROR -->
-    <div id="error" class="error-box hidden"></div>
+    <!-- GLOBAL ERROR (Strictly Hidden by default) -->
+    <div id="error" class="error-box hidden" style="display: none;"></div>
 
     <!-- PRODUCTS SECTION (hidden until login) -->
     <div id="productsSection" class="hidden">
@@ -715,8 +715,8 @@
         try {
           const db = initDB();
 
-          // First, verify the PIN exists in yacht table
-          const {  yachtData, error: yachtError } = await db
+          // Correct destructuring syntax (data -> yachtData)
+          const { data: yachtData, error: yachtError } = await db
             .from('yacht')
             .select('yacht_id, nome_yacht')
             .eq('yacht_id', pin)
@@ -745,9 +745,9 @@
 
         } catch (err) {
           console.error('Error:', err);
-          showError(err.message || 'Errore durante il caricamento');
+          // Do NOT call showError here. Just hide loading and throw.
           loadingEl.classList.add('hidden');
-          throw err; // Re-throw to be caught by caller
+          throw err; 
         }
       }
 
@@ -802,6 +802,7 @@
       function showError(message) {
         const errorEl = document.getElementById('error');
         errorEl.classList.remove('hidden');
+        errorEl.style.display = 'block';
         errorEl.innerHTML = `
           <h3>❌ Errore</h3>
           <p><strong>Dettaglio:</strong> <code>${message}</code></p>
@@ -812,7 +813,7 @@
       function showLoginError() {
         const errorEl = document.getElementById('loginError');
         errorEl.classList.add('show');
-        setTimeout(() => errorEl.classList.remove('show'), 3000);
+        setTimeout(() => errorEl.classList.remove('show'), 5000);
       }
 
       function hideLoginError() {
@@ -848,9 +849,10 @@
         
         setLoginLoading(true);
         
-        // ⚠️ CRITICAL: Always hide products and errors before attempting login
-        document.getElementById('productsSection').classList.add('hidden');
+        // Hide global error and products immediately
         document.getElementById('error').classList.add('hidden');
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('productsSection').classList.add('hidden');
         document.getElementById('scansPanel').style.display = 'none';
         
         try {
@@ -866,10 +868,12 @@
           showLoginError();
           document.querySelector('#loginError').textContent = '❌ PIN non trovato. Controlla e riprova.';
           
-          // ⚠️ CRITICAL: Ensure everything stays hidden on error
+          // Ensure everything stays hidden on error
           document.getElementById('productsSection').classList.add('hidden');
           document.getElementById('loginSection').classList.remove('hidden');
           document.getElementById('scansPanel').style.display = 'none';
+          document.getElementById('error').classList.add('hidden');
+          document.getElementById('error').style.display = 'none';
           
           pinInput.focus();
           pinInput.select();
@@ -889,6 +893,7 @@
         document.getElementById('pinInput').value = '';
         document.getElementById('scansPanel').style.display = 'none';
         document.getElementById('error').classList.add('hidden');
+        document.getElementById('error').style.display = 'none';
         hideLoginError();
       });
 
